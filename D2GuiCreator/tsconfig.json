@@ -9,9 +9,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    // d2-gui-shared jest instalowane przez `file:` (symlink do dist/) — bez tego TS rozwiązuje @angular/core
-    // z node_modules biblioteki i typy Signal<T> z dwóch kopii Angulara są niezgodne.
-    "preserveSymlinks": true,
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,

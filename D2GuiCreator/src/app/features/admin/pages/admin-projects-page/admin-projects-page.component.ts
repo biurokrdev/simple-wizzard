@@ -1,7 +1,7 @@
 import { formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { D2GridCellDef, D2GridComponent, GridColumn } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, GridColumn } from '../../../../shared/ui/grid';
 import { forkJoin } from 'rxjs';
 import { PageLayoutComponent } from '../../../../shared/ui/page-layout/page-layout.component';
 import { ProjectResponse, WizardDataService } from '../../../letter-wizard/services/wizard-data.service';

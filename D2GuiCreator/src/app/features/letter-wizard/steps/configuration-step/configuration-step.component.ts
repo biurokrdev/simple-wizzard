@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject, input, signal } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from '../../../../shared/ui/grid';
 import { WorkerService } from '../../services/worker.service';
 import type { Worker } from '../../models/worker.model';
 import { WorkerFormData } from '../../models/worker-form.model';

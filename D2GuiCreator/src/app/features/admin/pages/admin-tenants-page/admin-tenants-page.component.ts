@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from '../../../../shared/ui/grid';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { ProjectResponse, WizardDataService } from '../../../letter-wizard/services/wizard-data.service';

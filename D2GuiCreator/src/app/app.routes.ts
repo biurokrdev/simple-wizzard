@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { D2AppShellComponent } from 'd2-gui-shared';
+import { D2AppShellComponent } from './shared/ui/shell/app-shell.component';
 import { adminGuard } from './core/guards/admin.guard';
 
 export const APP_ROUTES: Routes = [

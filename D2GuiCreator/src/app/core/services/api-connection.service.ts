@@ -15,7 +15,7 @@ export interface ApiHealthResponse {
 
 /**
  * Monitor połączenia z API (health-check co 10 s) + dane o buildzie API.
- * Źródło dla shella `d2-gui-shared`: `isApiConnected` (baner offline) oraz `buildNumber`/`buildDate` (stopka).
+ * Źródło dla shella (`shared/ui/shell`): `isApiConnected` (baner offline) oraz `buildNumber`/`buildDate` (stopka).
  */
 @Injectable({
   providedIn: 'root'

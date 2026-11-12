@@ -4,7 +4,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ValidationNotesComponent, ValidationNote } from '../../components/validation-notes/validation-notes.component';
 import { DocumentService, DocumentValidationResult, PlaceholderExtractionResult } from '../../services/document.service';
 import { forkJoin } from 'rxjs';
-import { D2GridCellDef, D2GridComponent, GridColumn } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, GridColumn } from '../../../../shared/ui/grid';
 import { LetterWizardFacade } from '../../data-access/letter-wizard.facade';
 import {
   CONTENT_CONTROL_KIND_HINTS,

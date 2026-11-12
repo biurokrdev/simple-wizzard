@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { D2GridCellDef, D2GridComponent, GridColumn } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, GridColumn } from '../../../../shared/ui/grid';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';

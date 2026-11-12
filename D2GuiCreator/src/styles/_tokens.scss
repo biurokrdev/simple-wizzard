@@ -81,7 +81,7 @@ $control-radius: var(--d2-control-radius);
 $panel-radius: var(--d2-panel-radius);
 $panel-padding: var(--d2-panel-padding);
 
-// Kolory semantyczne pochodzą z MOTYWU (zmienne CSS `--d2-color-*` z d2-gui-shared, przełączane
+// Kolory semantyczne pochodzą z MOTYWU (zmienne CSS `--d2-color-*` ze styles/_theme.scss, przełączane
 // przez D2ThemeService / paletę linii biznesowej). Tokeny SCSS są tylko aliasami — nie używaj na nich
 // funkcji kolorów Sass (color.adjust itp.), bo to nie są już wartości statyczne.
 $color-primary: var(--d2-color-primary);

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from '../../../../shared/ui/grid';
 import { PageLayoutComponent } from '../../../../shared/ui/page-layout/page-layout.component';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
 import { prettyPrintJson } from '../../../letter-wizard/models/worker-config.util';

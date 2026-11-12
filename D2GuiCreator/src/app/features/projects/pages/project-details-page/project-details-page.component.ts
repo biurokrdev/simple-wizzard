@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from '../../../../shared/ui/grid';
 import { PageLayoutComponent } from '../../../../shared/ui/page-layout/page-layout.component';
 import { WizardDataService, ProjectResponse, ProjectVersionResponse } from '../../../letter-wizard/services/wizard-data.service';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';

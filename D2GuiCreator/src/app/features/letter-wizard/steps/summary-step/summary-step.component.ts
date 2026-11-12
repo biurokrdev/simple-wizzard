@@ -1,6 +1,6 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, signal, inject, computed } from '@angular/core';
-import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, D2GridDetailDef, GridColumn, GridLabels } from '../../../../shared/ui/grid';
 import { LetterWizardData, LetterWizardStepKey } from '../../data-access/letter-wizard.model';
 import { SubmissionIssue } from '../../data-access/letter-wizard-submission';
 import { RecipientDto, BusinessLineDto, StatusDto } from '../../data-access/external-data.model';

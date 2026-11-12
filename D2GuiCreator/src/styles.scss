@@ -1,6 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
-// Motyw D2 (D2GuiShared): zmienne CSS kolorów i rozmiarów + klasy .d2-page / .d2-panel / .d2-field
-@use 'd2-gui-shared/styles/theme';
+// Motyw D2 (styles/_theme.scss): zmienne CSS kolorów i rozmiarów + klasy .d2-page / .d2-panel / .d2-field
+@use 'styles/theme';
 @use 'styles/tokens';
 @use 'styles/mixins';
 @use 'styles/typography';

@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors, HTTP_INTERCEPTORS, withXhr } from '@angular/common/http';
-import { provideD2Gui, withBuildInfo, withConnectionStatus } from 'd2-gui-shared';
+import { provideD2Gui, withBuildInfo, withConnectionStatus } from './shared/ui/config/d2-gui.config';
 
 import { environment } from '../environments/environment';
 import { ApiConnectionService } from './core/services/api-connection.service';

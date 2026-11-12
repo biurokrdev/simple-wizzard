@@ -1,6 +1,6 @@
 import { formatDate } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { D2GridCellDef, D2GridComponent, GridColumn } from 'd2-gui-shared';
+import { D2GridCellDef, D2GridComponent, GridColumn } from '../../../../shared/ui/grid';
 import { Project } from '../../../../shared/models/project.model';
 
 /**
