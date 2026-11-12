@@ -1,0 +1,241 @@
+trigger:
+  branches:
+    include:
+      - develop
+      - main
+      - release/*
+  paths:
+    exclude:
+      - README.md
+      - DEPLOYMENT.md
+      - docs/*
+
+variables:
+  nodeVersion: '22.x'
+  imageName: 'd2-gui-creator'
+  
+stages:
+  # Build stage - wspólny dla wszystkich środowisk
+  - stage: Build
+    displayName: 'Build Application'
+    jobs:
+      - job: BuildJob
+        displayName: 'Build and Test'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: $(nodeVersion)
+
+          - script: |
+              npm ci
+            displayName: 'Install dependencies'
+
+          - script: |
+              npm run test -- --watch=false --browsers=ChromeHeadless
+            displayName: 'Run unit tests'
+            continueOnError: false
+
+          - script: |
+              npm run build
+            displayName: 'Build application'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish build artifacts'
+            inputs:
+              PathtoPublish: 'dist'
+              ArtifactName: 'dist'
+              publishLocation: 'Container'
+
+  # DEV Environment
+  - stage: DeployDEV
+    displayName: 'Deploy to DEV'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    variables:
+      environment: 'dev'
+      containerRegistry: 'your-dev-registry.azurecr.io'
+      imageTag: 'dev-$(Build.BuildId)'
+      targetPort: 8080
+    jobs:
+      - deployment: DeployDEV
+        displayName: 'Deploy to DEV Environment'
+        environment: 'DEV'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadBuildArtifacts@1
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'dist'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                - task: Docker@2
+                  displayName: 'Build container image'
+                  inputs:
+                    command: 'build'
+                    repository: '$(imageName)'
+                    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+                    tags: |
+                      $(imageTag)
+                      dev-latest
+
+                - task: Docker@2
+                  displayName: 'Push image to registry'
+                  inputs:
+                    command: 'push'
+                    containerRegistry: 'dev-acr-connection'
+                    repository: '$(imageName)'
+                    tags: |
+                      $(imageTag)
+                      dev-latest
+
+                - script: |
+                    echo "Deploying to DEV with Podman..."
+                    podman pull $(containerRegistry)/$(imageName):$(imageTag)
+                    podman stop $(imageName)-dev || true
+                    podman rm $(imageName)-dev || true
+                    podman run -d \
+                      --name $(imageName)-dev \
+                      -p $(targetPort):80 \
+                      -e ENVIRONMENT=dev \
+                      --restart unless-stopped \
+                      $(containerRegistry)/$(imageName):$(imageTag)
+                  displayName: 'Deploy to DEV with Podman'
+
+  # UAT Environment
+  - stage: DeployUAT
+    displayName: 'Deploy to UAT'
+    dependsOn: Build
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/'))
+    variables:
+      environment: 'uat'
+      containerRegistry: 'your-uat-registry.azurecr.io'
+      imageTag: 'uat-$(Build.BuildId)'
+      targetPort: 8081
+    jobs:
+      - deployment: DeployUAT
+        displayName: 'Deploy to UAT Environment'
+        environment: 'UAT'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadBuildArtifacts@1
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'dist'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                - task: Docker@2
+                  displayName: 'Build container image'
+                  inputs:
+                    command: 'build'
+                    repository: '$(imageName)'
+                    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+                    tags: |
+                      $(imageTag)
+                      uat-latest
+
+                - task: Docker@2
+                  displayName: 'Push image to registry'
+                  inputs:
+                    command: 'push'
+                    containerRegistry: 'uat-acr-connection'
+                    repository: '$(imageName)'
+                    tags: |
+                      $(imageTag)
+                      uat-latest
+
+                - script: |
+                    echo "Deploying to UAT with Podman..."
+                    podman pull $(containerRegistry)/$(imageName):$(imageTag)
+                    podman stop $(imageName)-uat || true
+                    podman rm $(imageName)-uat || true
+                    podman run -d \
+                      --name $(imageName)-uat \
+                      -p $(targetPort):80 \
+                      -e ENVIRONMENT=uat \
+                      --restart unless-stopped \
+                      $(containerRegistry)/$(imageName):$(imageTag)
+                  displayName: 'Deploy to UAT with Podman'
+
+  # PRD Environment
+  - stage: DeployPRD
+    displayName: 'Deploy to PRODUCTION'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      environment: 'prd'
+      containerRegistry: 'your-prd-registry.azurecr.io'
+      imageTag: 'prd-$(Build.BuildId)'
+      targetPort: 80
+    jobs:
+      - deployment: DeployPRD
+        displayName: 'Deploy to PRODUCTION Environment'
+        environment: 'PRD'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadBuildArtifacts@1
+                  displayName: 'Download artifacts'
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'dist'
+                    downloadPath: '$(System.ArtifactsDirectory)'
+
+                - task: Docker@2
+                  displayName: 'Build container image'
+                  inputs:
+                    command: 'build'
+                    repository: '$(imageName)'
+                    dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+                    tags: |
+                      $(imageTag)
+                      prd-latest
+                      latest
+
+                - task: Docker@2
+                  displayName: 'Push image to registry'
+                  inputs:
+                    command: 'push'
+                    containerRegistry: 'prd-acr-connection'
+                    repository: '$(imageName)'
+                    tags: |
+                      $(imageTag)
+                      prd-latest
+                      latest
+
+                - script: |
+                    echo "Deploying to PRODUCTION with Podman..."
+                    podman pull $(containerRegistry)/$(imageName):$(imageTag)
+                    podman stop $(imageName)-prd || true
+                    podman rm $(imageName)-prd || true
+                    podman run -d \
+                      --name $(imageName)-prd \
+                      -p $(targetPort):80 \
+                      -e ENVIRONMENT=production \
+                      --restart unless-stopped \
+                      $(containerRegistry)/$(imageName):$(imageTag)
+                  displayName: 'Deploy to PRD with Podman'
+
+                - script: |
+                    echo "Running smoke tests..."
+                    sleep 10
+                    curl -f http://localhost:$(targetPort) || exit 1
+                  displayName: 'Smoke test'

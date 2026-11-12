@@ -1,0 +1,30 @@
+<nav class="wizard-stepper">
+  <ol class="wizard-stepper__list">
+    @for (step of steps; track trackByKey($index, step)) {
+      <li
+        class="wizard-stepper__item"
+        [class.accepted]="step.status === 'accepted'"
+        [class.in-progress]="step.status === 'in-progress'"
+        [class.todo]="step.status === 'todo'">
+        <button
+          type="button"
+          class="wizard-stepper__button"
+          [disabled]="step.status === 'todo'"
+          (click)="onStepClick(step)">
+          <span class="wizard-stepper__circle">
+            @if (step.status === 'accepted') {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            } @else {
+              {{ step.index }}
+            }
+          </span>
+          <span class="wizard-stepper__label">
+            {{ step.label }}
+          </span>
+        </button>
+      </li>
+    }
+  </ol>
+</nav>

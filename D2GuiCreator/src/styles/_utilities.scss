@@ -1,0 +1,64 @@
+@use 'tokens';
+@use 'mixins';
+
+// Text utilities
+.u-text-muted {
+  color: tokens.$color-text-muted;
+}
+
+.u-ellipsis {
+  @include mixins.text-ellipsis;
+}
+
+// Color utilities - zgodnie z proporcjami palety
+// Orange 50% - dominujący
+.u-text-primary {
+  color: tokens.$color-primary;
+}
+
+.u-bg-primary {
+  background-color: tokens.$color-primary;
+}
+
+.u-border-primary {
+  border-color: tokens.$color-primary;
+}
+
+// Raspberry 20% - akcenty wyraziste
+.u-text-accent {
+  color: tokens.$color-accent;
+}
+
+.u-bg-accent {
+  background-color: tokens.$color-accent;
+}
+
+.u-border-accent {
+  border-color: tokens.$color-accent;
+}
+
+// Sun 15% - akcenty ciepłe
+.u-text-tertiary {
+  color: tokens.$color-tertiary;
+}
+
+.u-bg-tertiary {
+  background-color: tokens.$color-tertiary;
+}
+
+.u-border-tertiary {
+  border-color: tokens.$color-tertiary;
+}
+
+// Maroon 15% - akcenty ciemne
+.u-text-secondary {
+  color: tokens.$color-secondary;
+}
+
+.u-bg-secondary {
+  background-color: tokens.$color-secondary;
+}
+
+.u-border-secondary {
+  border-color: tokens.$color-secondary;
+}

@@ -1,0 +1,149 @@
+@use 'tokens';
+
+.tenants-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: tokens.$color-text-muted;
+  }
+}
+
+.tenant-name {
+  font-weight: 600;
+  color: tokens.$color-header;
+}
+
+.d2-row-button--danger {
+  color: var(--d2-color-danger);
+  border-color: var(--d2-color-danger);
+}
+
+// Zakładki w szczegółach wiersza zespołu
+.detail-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid tokens.$color-border-subtle;
+
+  &__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 10px;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: tokens.$color-text-muted;
+    cursor: pointer;
+
+    &:hover {
+      color: tokens.$color-header;
+    }
+
+    &--active {
+      color: tokens.$color-primary;
+      border-bottom-color: tokens.$color-primary;
+    }
+  }
+
+  &__count {
+    padding: 0 7px;
+    border-radius: 9px;
+    font-size: 12px;
+    background: tokens.$color-bg-subtle;
+    color: tokens.$color-text-muted;
+  }
+}
+
+// Szczegóły wiersza: użytkownicy zespołu
+.members {
+  text-align: left;
+
+  &--busy {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  &__empty {
+    margin: 0 0 12px;
+    font-size: 14px;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: tokens.$color-surface;
+    border: 1px solid tokens.$color-border-subtle;
+    border-radius: 8px;
+    overflow: hidden;
+
+    th {
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: tokens.$color-text-muted;
+      background: tokens.$color-bg-subtle;
+      border-bottom: 1px solid tokens.$color-border-subtle;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid tokens.$color-border-subtle;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  &__row--blocked td:first-child {
+    color: tokens.$color-text-muted;
+    text-decoration: line-through;
+  }
+
+  &__remove {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  &__add {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    max-width: 520px;
+  }
+
+  &__add-input {
+    height: 40px;
+    font-size: 14px;
+  }
+}

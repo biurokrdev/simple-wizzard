@@ -1,0 +1,140 @@
+@use 'tokens';
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.mapping {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: tokens.$color-text-main;
+  line-height: 1.5;
+
+  &--compact {
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+  }
+
+  &--unknown {
+    color: tokens.$color-text-muted;
+  }
+}
+
+/* Lewa strona: znacznik / kontrolka */
+.mapping__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--placeholder {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+
+  &--control {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+  }
+}
+
+.mapping__arrow {
+  display: inline-flex;
+  color: tokens.$color-primary;
+  flex-shrink: 0;
+}
+
+.mapping__relation {
+  color: tokens.$color-text-muted;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Prawa strona: ścieżka w modelu danych jako łańcuch segmentów */
+.mapping__path {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.mapping__segment {
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  white-space: nowrap;
+
+  &--root {
+    background: #ffffff;
+    color: tokens.$color-text-muted;
+    border-style: dashed;
+  }
+}
+
+.mapping__path-sep {
+  color: #9ca3af;
+  padding: 0 0.1rem;
+}
+
+.mapping__expression {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapping__meta {
+  color: tokens.$color-text-muted;
+  font-size: 0.8em;
+  white-space: nowrap;
+
+  strong {
+    color: tokens.$color-text-main;
+    font-weight: 600;
+  }
+}
+
+.mapping__missing {
+  color: #b45309;
+  font-style: italic;
+}
+
+/* Nieznany typ / zepsuty JSON */
+.mapping__raw {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.8em;
+  color: tokens.$color-text-muted;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapping__warn {
+  color: #dc2626;
+  flex-shrink: 0;
+}

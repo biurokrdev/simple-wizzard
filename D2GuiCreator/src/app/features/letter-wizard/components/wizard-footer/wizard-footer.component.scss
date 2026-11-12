@@ -1,0 +1,137 @@
+@use 'tokens';
+@use 'mixins';
+
+.wizard-footer {
+  @include mixins.flex-row(center, space-between, 1rem);
+  margin-top: 1.5rem;
+}
+
+.wizard-footer__left,
+.wizard-footer__right {
+  @include mixins.flex-row(center, flex-start, 0.75rem);
+}
+
+/* Bazowy styl przycisku w stopce */
+.wizard-footer__button {
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  font-size: tokens.$font-size-base;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffffff;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+/* Primary – Dalej / Zakończ (Orange - dominujący) */
+.wizard-footer__button--primary {
+  background: tokens.$color-primary;
+  color: #ffffff;
+  border: 1.5px solid tokens.$color-primary;
+
+  &:hover {
+    background: tokens.$color-primary-hover;
+    border-color: tokens.$color-primary-hover;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Secondary – Zapisz (Maroon - outline) */
+.wizard-footer__button--secondary {
+  border: 1.5px solid #4D0020;
+  background: #ffffff;
+  color: #4D0020;
+
+  &:hover {
+    background: #4D0020;
+    border-color: #4D0020;
+    color: #ffffff;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 0.5rem;
+  }
+}
+
+/* Ghost – Anuluj (Maroon - outline) */
+.wizard-footer__button--ghost {
+  border: 1.5px solid #4D0020;
+  background: transparent;
+  color: #4D0020;
+
+  &:hover {
+    background: #4D0020;
+    border-color: #4D0020;
+    color: #ffffff;
+  }
+}
+
+/* Accent – Wstecz (Maroon - wypełniony) */
+.wizard-footer__button--accent {
+  background: #4D0020;
+  color: #ffffff;
+  border: 1.5px solid #4D0020;
+
+  &:hover {
+    background: #340016;
+    border-color: #340016;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Neutral – Wstecz (bez obramowania) - STARY STYL */
+.wizard-footer__button--neutral {
+  border: none;
+  background: transparent;
+  color: #40383B;
+
+  &:hover {
+    background: #F7F4F1;
+  }
+}
+
+/* ========================= */
+/*      RESPONSYWNOŚĆ        */
+/* ========================= */
+
+@media (max-width: 768px) {
+  .wizard-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .wizard-footer__left,
+  .wizard-footer__right {
+    display: flex;
+    justify-content: stretch;
+    width: 100%;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* Przyciski na mobile w pełnej szerokości */
+  .wizard-footer__button {
+    flex: 1 1 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  /* Anuluj też zachowuje się jak pełnoprawny przycisk */
+  .wizard-footer__left .wizard-footer__button--ghost {
+    flex: 1 1 100%;
+    text-align: center;
+    background: #ffffff;
+  }
+}

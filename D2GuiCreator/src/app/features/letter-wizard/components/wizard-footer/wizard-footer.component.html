@@ -1,0 +1,94 @@
+<footer class="wizard-footer">
+  <div class="wizard-footer__left">
+    <app-button
+      [variant]="'secondary'"
+      [style]="'outline'"
+      (clicked)="onCancel()">
+      {{ readOnly ? 'Zamknij' : 'Anuluj' }}
+    </app-button>
+
+    @if (reviewMode) {
+      <div class="wizard-footer__save-info wizard-footer__readonly">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"></path>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        <span class="wizard-footer__save-text">Tryb przeglądu — {{ isLastStep ? 'podejmij decyzję' : 'decyzja na ostatnim kroku' }}</span>
+      </div>
+    } @else if (readOnly) {
+      <div class="wizard-footer__save-info wizard-footer__readonly">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span class="wizard-footer__save-text">Tryb podglądu — zmiany nie są możliwe</span>
+      </div>
+    } @else if (lastSaved) {
+      <div class="wizard-footer__save-info">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+        </svg>
+        <span class="wizard-footer__save-text">Ostatni zapis: {{ lastSaved }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="wizard-footer__right">
+    @if (!readOnly) {
+    <app-button
+      [variant]="'secondary'"
+      [style]="'outline'"
+      [disabled]="isSaving"
+      (clicked)="onSave()">
+      @if (!isSaving) {
+        <span>Zapisz</span>
+      }
+      @if (isSaving) {
+        <span>
+          <svg class="spinner" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="31.4" stroke-dashoffset="10">
+              <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="1s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+          Zapisywanie...
+        </span>
+      }
+    </app-button>
+    }
+
+    @if (canGoBack) {
+      <app-button
+        [variant]="'secondary'"
+        (clicked)="onBack()">
+        Wstecz
+      </app-button>
+    }
+
+    @if (reviewMode && isLastStep) {
+      <app-button
+        [variant]="'accent'"
+        [disabled]="isSubmitting"
+        (clicked)="onReject()">
+        Odeślij do poprawy
+      </app-button>
+      <app-button
+        [variant]="'primary'"
+        [disabled]="isSubmitting"
+        (clicked)="onApprove()">
+        Zaakceptuj
+      </app-button>
+    } @else {
+      <app-button
+        [variant]="'primary'"
+        [disabled]="isSubmitting || !canGoNext"
+        (clicked)="onNext()">
+        @if (!isLastStep) {
+          <span>Dalej</span>
+        }
+        @if (isLastStep) {
+          <span>{{ readOnly ? 'Zamknij podgląd' : 'Wyślij do weryfikacji' }}</span>
+        }
+      </app-button>
+    }
+  </div>
+</footer>

@@ -1,0 +1,164 @@
+@use 'tokens';
+
+/* ========================================
+   LISTY OPARTE O d2-grid (D2GuiShared)
+   Wspólne klasy dla treści projektowanej do grida: akcje wiersza, akcje nad
+   listą, odznaki typu i panel JSON w szczegółach wiersza. Są globalne, bo
+   szablony komórek (ng-template d2GridCell / d2GridDetail) renderują się
+   w różnych komponentach, a wygląd ma być jeden.
+   ======================================== */
+
+// Główna akcja wiersza („Wyświetl”, „Edytuj”) — pigułka jak w projekcie list D2
+.d2-row-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--d2-grid-primary, #4b4a9b);
+  background: #ffffff;
+  border: 1.5px solid var(--d2-grid-primary, #4b4a9b);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #fff3ea;
+  }
+
+  &:disabled {
+    color: #9b9b9b;
+    border-color: #c9c9c9;
+    cursor: not-allowed;
+  }
+}
+
+// Ikona-przycisk w wierszu (usuń, menu)
+.d2-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: #6b6b6b;
+  cursor: pointer;
+
+  &:hover {
+    background: #fff3ea;
+    color: var(--d2-grid-primary, #4b4a9b);
+  }
+
+  &--danger:hover {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Komórka akcji — przyciski wyrównane do prawej
+.d2-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+// Odznaka typu (typ workera, typ znalezionego elementu)
+.d2-type-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  background: #e0f2fe;
+  color: #0369a1;
+  white-space: nowrap;
+
+  &--placeholder {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  // Rodzaje formantów rozpoznane w szablonie (content-control-kind.ts)
+  &--variant,
+  &--boolean {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &--repeat,
+  &--array {
+    background: var(--d2-color-accent-light, #ece6ff);
+    color: var(--d2-color-accent, #4b4a9b);
+  }
+
+  &--list {
+    background: var(--d2-color-success-light, #e3f6e8);
+    color: var(--d2-color-success, #1e8700);
+  }
+
+  &--table {
+    background: var(--d2-color-primary-light, #fde3cf);
+    color: var(--d2-color-primary-hover, #cc4e00);
+  }
+}
+
+// Identyfikatory techniczne (nazwy elementów, GUID-y)
+.d2-mono {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+}
+
+// Panel JSON w szczegółach wiersza (ng-template d2GridDetail)
+.d2-json-detail {
+  text-align: left;
+}
+
+.d2-json-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #6b6b6b;
+
+  strong {
+    color: #1c1c1c;
+  }
+}
+
+.d2-json-detail__pre {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e3e3e3;
+  border-radius: 4px;
+  background: #f7f7f7;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #1f2937;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ========================================
+   KREATOR W TRYBIE PODGLĄDU (mode=view)
+   Globalnie, bo pola są w kilku komponentach kroków (enkapsulacja stylów).
+   ======================================== */
+.document-wizard--readonly :is(input, select, textarea):disabled {
+  background-color: #f6f6f6;
+  color: #444444;
+  border-color: #e3e3e3;
+  cursor: default;
+  opacity: 1;
+}

@@ -1,0 +1,83 @@
+@if (isOpen) {
+  <div class="dialog-overlay" (click)="onCancel()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog__header">
+        <h2 class="dialog__title">{{ mapping ? 'Edytuj mapowanie' : 'Dodaj mapowanie' }}</h2>
+        <button type="button" class="dialog__close" (click)="onCancel()" aria-label="Zamknij">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form [formGroup]="form" class="dialog__content">
+        <div class="form-field">
+          <label for="name" class="form-field__label">
+            Nazwa tagu <span class="required">*</span>
+          </label>
+          <input
+            id="name"
+            type="text"
+            class="form-field__control"
+            formControlName="name"
+            placeholder="np. E_CTY_ANONIMN" />
+            @if (form.get('name')?.touched && form.get('name')?.errors?.['required']) {
+              <div class="form-field__error">
+                Nazwa tagu jest wymagana
+              </div>
+            }
+          </div>
+          <div class="form-field">
+            <label for="mapperType" class="form-field__label">
+              Typ mapera <span class="required">*</span>
+            </label>
+            <select
+              id="mapperType"
+              class="form-field__control"
+              formControlName="mapperType">
+              <option value="">Wybierz typ mapera</option>
+              @for (mapperType of mapperTypes; track mapperType) {
+                <option [value]="mapperType.key">
+                  {{ mapperType.name }}
+                </option>
+              }
+            </select>
+            @if (form.get('mapperType')?.touched && form.get('mapperType')?.errors?.['required']) {
+              <div class="form-field__error">
+                Typ mapera jest wymagany
+              </div>
+            }
+          </div>
+          <div class="form-field">
+            <label for="mappingJson" class="form-field__label">
+              JSON mapowania <span class="required">*</span>
+            </label>
+            <textarea
+              id="mappingJson"
+              class="form-field__control form-field__control--textarea"
+              formControlName="mappingJson"
+              rows="12"
+            placeholder="Wpisz lub edytuj JSON konfiguracji mapowania"></textarea>
+            @if (form.get('mappingJson')?.touched && form.get('mappingJson')?.errors?.['required']) {
+              <div class="form-field__error">
+                JSON mapowania jest wymagany
+              </div>
+            }
+          </div>
+        </form>
+        <div class="dialog__footer">
+          <app-button
+            [variant]="'secondary'"
+            (clicked)="onCancel()">
+            Anuluj
+          </app-button>
+          <app-button
+            [variant]="'primary'"
+            [disabled]="!form.valid"
+            (clicked)="onSave()">
+            {{ mapping ? 'Zapisz' : 'Dodaj' }}
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }

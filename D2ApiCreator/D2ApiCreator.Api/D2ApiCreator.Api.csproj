@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <InternalsVisibleTo>D2ApiCreator.Tests.Integration</InternalsVisibleTo>
+      <UserSecretsId>32df1590-5be4-4db6-9d8f-eda76f814e93</UserSecretsId>
+  </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Asp.Versioning.Mvc" Version="10.2.1" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\D2ApiCreator.Application\D2ApiCreator.Application.csproj" />
+      <ProjectReference Include="..\D2ApiCreator.Infrastructure\D2ApiCreator.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

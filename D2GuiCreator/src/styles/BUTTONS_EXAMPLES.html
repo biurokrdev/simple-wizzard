@@ -1,0 +1,244 @@
+<!-- 
+  PRZYKŁADY UŻYCIA PRZYCISKÓW Z NOWEJ PALETY
+  
+  Skopiuj poniższe przykłady do swoich komponentów HTML
+-->
+
+<!-- ========================================
+     PRIMARY BUTTONS - ORANGE (Główne akcje)
+     ======================================== -->
+
+<!-- Standardowy -->
+<button class="btn-primary">
+  Wyślij do weryfikacji
+</button>
+
+<!-- Z ikoną -->
+<button class="btn-primary">
+  <span class="btn__icon">
+    <svg><!-- ikona --></svg>
+  </span>
+  Zapisz i kontynuuj
+</button>
+
+<!-- Duży -->
+<button class="btn-primary btn--lg">
+  Rozpocznij
+</button>
+
+<!-- Mały -->
+<button class="btn-primary btn--sm">
+  Potwierdź
+</button>
+
+<!-- Pełna szerokość -->
+<button class="btn-primary btn--full">
+  Dalej
+</button>
+
+<!-- Stan ładowania -->
+<button class="btn-primary btn--loading">
+  Przetwarzanie...
+</button>
+
+<!-- Wyłączony -->
+<button class="btn-primary" disabled>
+  Wyłączony
+</button>
+
+
+<!-- ========================================
+     SECONDARY BUTTONS - VIOLET (Akcje drugorzędne)
+     ======================================== -->
+
+<!-- Outline (wypełnia się po hover) -->
+<button class="btn-secondary">
+  Zapisz szkic
+</button>
+
+<!-- Wypełniony (przyciemnia się po hover) -->
+<button class="btn-secondary--filled">
+  Eksportuj
+</button>
+
+<button class="btn-secondary">
+  <span class="btn__icon">
+    <svg><!-- ikona --></svg>
+  </span>
+  Duplikuj projekt
+</button>
+
+
+<!-- ========================================
+     TERTIARY BUTTONS - SUN (Akcje pomocnicze)
+     ======================================== -->
+
+<!-- Outline -->
+<button class="btn-tertiary">
+  Generuj dane testowe
+</button>
+
+<!-- Wypełniony -->
+<button class="btn-tertiary--filled">
+  API Request
+</button>
+
+<button class="btn-tertiary btn--sm">
+  Podgląd
+</button>
+
+
+<!-- ========================================
+     GHOST BUTTONS - VIOLET (Anulowanie)
+     ======================================== -->
+
+<!-- Wypełnia się kolorem po hover -->
+<button class="btn-ghost">
+  Anuluj
+</button>
+
+<button class="btn-ghost">
+  Zamknij
+</button>
+
+<button class="btn-ghost btn--sm">
+  Cofnij
+</button>
+
+
+<!-- ========================================
+     NEUTRAL BUTTONS - Czarny tekst bez obramowania
+     Akcje nawigacyjne
+     ======================================== -->
+
+<button class="btn-neutral">
+  Wstecz
+</button>
+
+<button class="btn-neutral">
+  Następny krok
+</button>
+
+
+<!-- ========================================
+     OUTLINE BUTTONS - NEUTRALNE
+     Wypełniają się kolorem po hover
+     ======================================== -->
+
+<button class="btn-outline">
+  Więcej opcji
+</button>
+
+<button class="btn-outline btn--sm">
+  Edytuj
+</button>
+
+
+<!-- ========================================
+     TEXT BUTTONS - MINIMALNE
+     ======================================== -->
+
+<!-- Primary text -->
+<button class="btn-text">
+  Zobacz szczegóły
+</button>
+
+<!-- Accent text -->
+<button class="btn-text btn-text--accent">
+  Dowiedz się więcej
+</button>
+
+<!-- Secondary text -->
+<button class="btn-text btn-text--secondary">
+  Pomiń
+</button>
+
+
+<!-- ========================================
+     DANGER BUTTONS - USUWANIE/BŁĘDY
+     ======================================== -->
+
+<button class="btn-danger">
+  Usuń projekt
+</button>
+
+<button class="btn-danger--outline">
+  Odrzuć zmiany
+</button>
+
+
+<!-- ========================================
+     SUCCESS BUTTONS - SUKCES
+     ======================================== -->
+
+<button class="btn-success">
+  Zatwierdź
+</button>
+
+<button class="btn-success--outline">
+  Akceptuj
+</button>
+
+
+<!-- ========================================
+     PRZYCISKI TYLKO Z IKONAMI
+     ======================================== -->
+
+<button class="btn-primary btn--icon-only">
+  <span class="btn__icon">
+    <svg><!-- ikona --></svg>
+  </span>
+</button>
+
+<button class="btn-secondary btn--icon-only btn--sm">
+  <span class="btn__icon">
+    <svg><!-- ikona --></svg>
+  </span>
+</button>
+
+
+<!-- ========================================
+     GRUPOWANIE PRZYCISKÓW
+     ======================================== -->
+
+<!-- Grupa standardowa -->
+<div class="btn-group">
+  <button class="btn-ghost">Anuluj</button>
+  <button class="btn-secondary">Zapisz</button>
+  <button class="btn-primary">Wyślij</button>
+</div>
+
+<!-- Grupa wyrównana do prawej -->
+<div class="btn-group btn-group--end">
+  <button class="btn-outline">Wstecz</button>
+  <button class="btn-primary">Dalej</button>
+</div>
+
+<!-- Grupa z odstępami między -->
+<div class="btn-group btn-group--between">
+  <button class="btn-ghost">Anuluj</button>
+  <div class="btn-group">
+    <button class="btn-secondary">Zapisz</button>
+    <button class="btn-primary">Dalej</button>
+  </div>
+</div>
+
+<!-- Grupa zwarta -->
+<div class="btn-group btn-group--compact">
+  <button class="btn-outline btn--sm">1</button>
+  <button class="btn-outline btn--sm">2</button>
+  <button class="btn-outline btn--sm">3</button>
+</div>
+
+
+<!-- ========================================
+     PRZYCISKI JAKO LINKI
+     ======================================== -->
+
+<a href="/projects" class="btn-primary">
+  Lista projektów
+</a>
+
+<a href="/help" class="btn-text">
+  Pomoc
+</a>

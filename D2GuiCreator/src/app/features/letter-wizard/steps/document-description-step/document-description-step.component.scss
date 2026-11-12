@@ -1,0 +1,170 @@
+@use 'tokens';
+@use 'mixins';
+
+.wizard-step__section-title {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+
+.wizard-step__section-subtitle {
+  font-size: tokens.$font-size-sm;
+  color: tokens.$color-text-muted;
+  margin-bottom: 0.75rem;
+}
+
+.wizard-step__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Jedna kolumna (dla retencji) */
+.wizard-step__grid--single {
+  grid-template-columns: 1fr;
+}
+
+.form-field {
+  @include mixins.flex-column(0.5rem);
+}
+
+.form-field__label {
+  @include mixins.field-label;
+}
+
+.form-field__required {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Pola wymagane dopiero przy wysyłce do weryfikacji (dane biznesowe, retencja) */
+.form-field__optional {
+  margin-left: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #9ca3af;
+  text-transform: lowercase;
+  letter-spacing: 0.01em;
+}
+
+.wizard-step__section-note {
+  display: block;
+  margin-top: 0.15rem;
+  color: #b45309;
+  font-size: 0.75rem;
+}
+
+.form-field__error {
+  @include mixins.field-error;
+  margin-top: 0;
+}
+
+.form-field__input-group {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+}
+
+.form-field--with-button .form-field__control {
+  flex: 1;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.form-field__control {
+  @include mixins.control;
+
+  // Szary placeholder dla select
+  option[disabled] {
+    color: tokens.$color-text-muted;
+  }
+
+  &--error {
+    @include mixins.control-error;
+  }
+}
+
+textarea.form-field__control {
+  @include mixins.control-textarea;
+}
+
+.form-field__copy-button {
+  width: tokens.$control-height;
+  height: tokens.$control-height;
+  padding: 0;
+  border-radius: tokens.$control-radius;
+  border: 1px solid tokens.$color-border-strong;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background: tokens.$color-surface;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: tokens.$color-text-muted;
+
+  &:hover {
+    background: tokens.$color-bg-subtle;
+    border-color: tokens.$color-primary;
+    color: tokens.$color-primary;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+/* Węższe pole licznikowe */
+.form-field--narrow {
+  max-width: 220px;
+}
+
+/* Środowiska */
+
+.wizard-step__environments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.wizard-step__environment-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: tokens.$radius-pill;
+  border: 1px solid tokens.$color-border-subtle;
+  background: #ffffff;
+  font-size: tokens.$font-size-sm;
+  cursor: pointer;
+}
+
+.wizard-step__environment-pill input {
+  margin: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .wizard-step__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field--narrow {
+    max-width: 100%;
+  }
+}
+
+/* Tablet - 2 kolumny */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .wizard-step__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

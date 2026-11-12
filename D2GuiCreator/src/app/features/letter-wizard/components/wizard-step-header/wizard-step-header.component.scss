@@ -1,0 +1,39 @@
+@use 'tokens';
+@use 'mixins';
+
+.wizard-step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0 0;
+  min-height: 2.5rem;
+}
+
+.wizard-step-header__title {
+  color: tokens.$color-primary;
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+.wizard-step-header__close {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: tokens.$color-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}

@@ -1,0 +1,80 @@
+@if (notes.length > 0) {
+  <div class="validation-notes">
+    <h3 class="validation-notes__title">{{ title }}</h3>
+    <div class="validation-notes__list">
+      @for (note of paginatedNotes; track trackByNoteId($index, note)) {
+        <div
+          class="note"
+          [ngClass]="'note--' + note.type">
+          <div class="note__icon">
+            <!-- Info icon -->
+            @if (note.type === 'info') {
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            }
+            <!-- Error icon -->
+            @if (note.type === 'error') {
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            }
+            <!-- Warning icon -->
+            @if (note.type === 'warning') {
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            }
+            <!-- Success icon -->
+            @if (note.type === 'success') {
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            }
+          </div>
+          <div class="note__content">
+            <p class="note__message">{{ note.message }}@if (note.details && note.details.length > 0) {
+              <span> {{ note.details.join(', ') }}</span>
+            }</p>
+          </div>
+          <button
+            type="button"
+            class="note__close"
+            (click)="removeNote(note.id)"
+            aria-label="Usuń uwagę">
+            ×
+          </button>
+        </div>
+      }
+    </div>
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <app-button
+          [variant]="'secondary'"
+          [size]="'small'"
+          [disabled]="!hasPrevPage"
+          (clicked)="prevPage()">
+          ‹
+        </app-button>
+        <div class="pagination__info">
+          Strona {{ currentPage + 1 }} z {{ totalPages }}
+        </div>
+        <app-button
+          [variant]="'secondary'"
+          [size]="'small'"
+          [disabled]="!hasNextPage"
+          (clicked)="nextPage()">
+          ›
+        </app-button>
+      </div>
+    }
+  </div>
+}

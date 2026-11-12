@@ -1,0 +1,407 @@
+<app-page-layout
+  [title]="'Szczegóły projektu dokumentu'">
+
+  <div actions class="action-buttons-header">
+    <app-button
+      [variant]="'secondary'"
+      [style]="'outline'"
+      [size]="'small'"
+      (clicked)="goBackToList()">
+      {{ backLabel() }}
+    </app-button>
+    <app-button
+      [variant]="'primary'"
+      [size]="'small'"
+      [disabled]="!project()"
+      (clicked)="startWizard()"
+      [title]="latestVersion()?.isActive ? 'Ostatnia wersja jest aktywna — utworzy nową wersję roboczą na jej podstawie' : 'Edytuj ostatnią wersję roboczą'">
+      {{ editButtonLabel() }}
+    </app-button>
+  </div>
+
+  <div content>
+    @if (isLoading()) {
+      <div class="loading-state">
+        <p>Ładowanie danych projektu...</p>
+      </div>
+    }
+
+    @if (!isLoading() && project(); as proj) {
+      <div class="project-details">
+        <!-- Nazwa projektowa + ID -->
+        <div class="project-header">
+          <div class="project-title-section">
+            <label class="project-label">Nazwa projektowa</label>
+            <h1 class="project-title">{{ proj.name }}</h1>
+          </div>
+          <div class="project-id-section">
+            <label class="project-label">ID Projektu</label>
+            <div class="project-id">{{ proj.id }}</div>
+          </div>
+        </div>
+        <!-- Sekcja Ogólne -->
+        <details class="detail-section" [open]="true">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Ogólne</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <div class="info-grid">
+              <div class="info-field">
+                <label class="info-field__label">Identyfikator pisma (source)</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.general?.sourceIdentifier || proj.source }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Nazwa aplikacji / systemu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.general?.applicationName || proj.applicationName || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Status</label>
+                <div class="info-field__value">
+                  @let active = activeVersion();
+                  <span class="status-badge" [class.status-active]="active" [class.status-draft]="!active">
+                    {{ active ? 'Aktywny — wersja ' + active.versionTag : 'Wersja robocza — brak aktywnej wersji' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+        <!-- Sekcja Dane biznesowe -->
+        <details class="detail-section">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Dane biznesowe</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <div class="info-grid">
+              <div class="info-field">
+                <label class="info-field__label">Nazwa procesu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.business?.processName || proj.processName || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Właściciel procesu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.business?.processOwner || proj.processOwner || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Wersja procesu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.business?.processVersion || proj.processVersion || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Krok procesu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.business?.processStep || proj.processStep || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Zespół (tenant)</label>
+                <div class="info-field__value">
+                  @if (proj.tenantId) {
+                    <span class="d2-type-badge">{{ proj.tenantName || proj.tenantId }}</span>
+                  } @else {
+                    projekt prywatny{{ proj.ownerCorporateKey ? ' — ' + proj.ownerCorporateKey : '' }}
+                  }
+                </div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Data utworzenia</label>
+                <div class="info-field__value">{{ proj.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Utworzył</label>
+                <div class="info-field__value">{{ proj.createdBy || 'System' }}</div>
+              </div>
+              @if (proj.description) {
+                <div class="info-field">
+                  <label class="info-field__label">Opis</label>
+                  <div class="info-field__value">{{ latestVersion()?.stepData?.description || proj.description }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        </details>
+        <!-- Sekcja Retencja danych -->
+        <details class="detail-section">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Retencja danych</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <div class="info-grid">
+              <div class="info-field">
+                <label class="info-field__label">Ilość dni przechowywania</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.general?.retentionDays || proj.retentionDays || 90 }} dni</div>
+              </div>
+            </div>
+          </div>
+        </details>
+        <!-- Sekcja Szablon i schemat danych -->
+        <details class="detail-section">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Szablon i schemat danych</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <div class="info-grid">
+              <div class="info-field">
+                <label class="info-field__label">Szablon dokumentu</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.templateAndSchema?.templateId || 'Nie podano' }}</div>
+              </div>
+              <div class="info-field">
+                <label class="info-field__label">Format wyjściowy</label>
+                <div class="info-field__value">{{ latestVersion()?.stepData?.templateAndSchema?.outputFormat?.toUpperCase() || '-' }}</div>
+              </div>
+            </div>
+            @if (detectedElements().length > 0) {
+              <div class="detected-elements-section">
+                <h3 class="detected-elements-title">Znalezione elementy w dokumencie ({{ detectedElements().length }})</h3>
+                <d2-grid
+                  [columns]="elementColumns"
+                  [rows]="detectedElements()"
+                  [showColumnFilters]="false"
+                  [pageSize]="10"
+                  caption="Znalezione elementy w dokumencie">
+                  <ng-template d2GridCell="name" let-element>
+                    <span class="d2-mono element-name">{{ element.name }}</span>
+                  </ng-template>
+                  <ng-template d2GridCell="label" let-element>
+                    <span [class]="'d2-type-badge ' + badgeClass(element.kind)" [title]="element.kind !== 'placeholder' ? kindHints[element.kind] : 'Znacznik tekstowy <%…%>'">
+                      {{ element.label }}
+                    </span>
+                  </ng-template>
+                </d2-grid>
+              </div>
+            }
+          </div>
+        </details>
+        <!-- Sekcja Konfiguracja mapowania wartości -->
+        <details class="detail-section">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Lista konfiguracji mapowania wartości</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <!-- Tabela d2-grid (D2GuiShared): pełny JSON konfiguracji w rozwijanych szczegółach wiersza („∨”). -->
+            <d2-grid
+              [columns]="workerColumns"
+              [rows]="workers()"
+              [trackBy]="trackWorker"
+              [loading]="isLoadingWorkers()"
+              [pageSize]="10"
+              [labels]="gridLabels"
+              caption="Lista konfiguracji mapowania wartości"
+              emptyMessage="Brak skonfigurowanych workerów">
+              <ng-template d2GridCell="name" let-worker>
+                <span class="d2-mono worker-name">{{ worker.name }}</span>
+              </ng-template>
+              <ng-template d2GridCell="workerType" let-worker>
+                <span class="d2-type-badge" [class.d2-type-badge--placeholder]="worker.workerType === 'Podstaw wartość'">
+                  {{ worker.workerType }}
+                </span>
+              </ng-template>
+              <ng-template d2GridCell="configJson" let-worker>
+                <app-worker-mapping-preview
+                  [workerType]="worker.workerType"
+                  [configJson]="worker.configJson" />
+              </ng-template>
+              <ng-template d2GridDetail let-worker>
+                <div class="d2-json-detail">
+                  <div class="d2-json-detail__header">
+                    <span>Konfiguracja JSON — <strong>{{ worker.name }}</strong> ({{ worker.workerType }})</span>
+                  </div>
+                  <pre class="d2-json-detail__pre">{{ prettyJson(worker.configJson) }}</pre>
+                </div>
+              </ng-template>
+            </d2-grid>
+          </div>
+        </details>
+        <!-- Sekcja Pozostałe informacje -->
+        <details class="detail-section">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Pozostałe informacje</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            <div class="additional-info">
+              @if (!latestVersion()?.notes) {
+                <p class="additional-info__text">Nie podano</p>
+              }
+              @if (latestVersion()?.notes) {
+                <textarea
+                  id="additionalInfo"
+                  class="additional-info__textarea"
+                  placeholder="Wpisz dodatkowe uwagi, informacje lub wymagania..."
+                  rows="6"
+                  [value]="latestVersion()?.notes || ''"
+                readonly></textarea>
+              }
+            </div>
+          </div>
+        </details>
+        <!-- Sekcja Wersje projektu -->
+        <details class="detail-section" [open]="true">
+          <summary class="detail-section__header">
+            <h2 class="detail-section__title">Wersje projektu ({{ versions().length }})</h2>
+            <svg class="detail-section__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </summary>
+          <div class="detail-section__content">
+            @if (isLoadingVersions()) {
+              <div class="loading-versions">
+                <p>Ładowanie wersji...</p>
+              </div>
+            }
+            @if (!isLoadingVersions() && versions().length === 0) {
+              <div class="no-versions">
+                <p>Brak wersji projektu</p>
+              </div>
+            }
+            @if (packageNotice(); as notice) {
+              <div class="admin-message" [class.admin-message--success]="notice.kind === 'success'" [class.admin-message--error]="notice.kind === 'error'">
+                {{ notice.text }}
+                <button type="button" class="admin-message__close" (click)="packageNotice.set(null)" aria-label="Zamknij">✕</button>
+              </div>
+            }
+            @if (!isLoadingVersions() && versions().length > 0) {
+              <div class="versions-list">
+                @for (version of versions(); track version) {
+                  <div class="version-card" [class.version-card--active]="version.isActive">
+                    <div class="version-card__header">
+                      <div class="version-card__title">
+                        <span class="version-card__tag">{{ version.versionTag }}</span>
+                        @if (version.isActive) {
+                          <span class="version-card__badge">Aktywna</span>
+                        }
+                      </div>
+                      <div class="version-card__date">{{ version.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+                    </div>
+                    <div class="version-card__info">
+                      <div class="version-info-row">
+                        <span class="version-info-label">Status:</span>
+                        <span class="version-info-value">
+                          <span class="status-pill" [class]="'status-pill status-pill--' + versionStatusKey(version.status)">{{ versionStatusLabel(version.status) }}</span>
+                        </span>
+                      </div>
+                      @if (version.reviewComment) {
+                        <div class="version-info-row version-info-row--review">
+                          <span class="version-info-label">{{ versionStatusKey(version.status) === 'changes' ? 'Do poprawy:' : 'Komentarz:' }}</span>
+                          <span class="version-info-value">{{ version.reviewComment }}@if (version.reviewedBy) { <span class="version-review-meta">— {{ version.reviewedBy }}, {{ version.reviewedAt | date:'dd.MM.yyyy HH:mm' }}</span> }</span>
+                        </div>
+                      }
+                      @if (reviewNotes(version); as notes) {
+                        @if (notes.length > 0) {
+                          <div class="version-info-row version-info-row--notes">
+                            <span class="version-info-label">Uwagi do kroków:</span>
+                            <ul class="review-notes" [class.review-notes--changes]="versionStatusKey(version.status) === 'changes'">
+                              @for (note of notes; track note.step) {
+                                <li class="review-notes__item">
+                                  <span class="review-notes__step">{{ note.label }}</span>
+                                  <span class="review-notes__text">{{ note.text }}</span>
+                                </li>
+                              }
+                            </ul>
+                          </div>
+                        }
+                      }
+                      @if (versionStatusKey(version.status) === 'pending') {
+                        <div class="version-info-row">
+                          <span class="version-info-label">Zgłoszono:</span>
+                          <span class="version-info-value">{{ version.submittedAt | date:'dd.MM.yyyy HH:mm' }} — czeka na decyzję administratora</span>
+                        </div>
+                      }
+                      @if (version.deliveredAt) {
+                        <div class="version-info-row version-info-row--delivery">
+                          <span class="version-info-label">Wysłano:</span>
+                          <span class="version-info-value">{{ version.deliveredAt | date:'dd.MM.yyyy HH:mm' }} → <span class="d2-mono version-delivery-target" [title]="version.deliveredTo ?? ''">{{ version.deliveredTo }}</span>@if (version.deliveredPackageSha) { <span class="version-review-meta" [title]="'SHA-256 paczki: ' + version.deliveredPackageSha">· {{ version.deliveredPackageSha.slice(0, 12) }}…</span> }</span>
+                        </div>
+                      }
+                      @if (version.createdBy) {
+                        <div class="version-info-row">
+                          <span class="version-info-label">Utworzył:</span>
+                          <span class="version-info-value">{{ version.createdBy }}</span>
+                        </div>
+                      }
+                      @if (version.notes) {
+                        <div class="version-info-row">
+                          <span class="version-info-label">Notatki:</span>
+                          <span class="version-info-value">{{ version.notes }}</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="version-card__actions">
+                      <app-button
+                        [variant]="'secondary'"
+                        [style]="'outline'"
+                        [size]="'small'"
+                        (clicked)="previewVersion(version.id)"
+                        title="Otwórz wersję w kreatorze tylko do odczytu">
+                        Podgląd
+                      </app-button>
+                      <app-button
+                        [variant]="'secondary'"
+                        [size]="'small'"
+                        (clicked)="editVersion(version.id)"
+                        [title]="version.isActive ? 'Wersja aktywna — utworzy nową wersję roboczą na jej podstawie' : 'Edytuj wersję roboczą'">
+                        {{ version.isActive ? 'Nowa wersja' : 'Edytuj' }}
+                      </app-button>
+                      @if (!version.isActive) {
+                        <app-button
+                          [variant]="'accent'"
+                          [size]="'small'"
+                          (clicked)="activateVersion(version.id)"
+                          title="Aktywuj tę wersję">
+                          Aktywuj
+                        </app-button>
+                      }
+                      <app-button
+                        [variant]="'secondary'"
+                        [style]="'outline'"
+                        [size]="'small'"
+                        [disabled]="packageBusyId() === version.id"
+                        (clicked)="downloadPackage(version)"
+                        title="Pobierz ZIP: manifest.json, workers.json (wszystkie workery) i szablon wgrany w tej wersji">
+                        {{ packageBusyId() === version.id ? 'Buduję paczkę…' : 'Pobierz paczkę (ZIP)' }}
+                      </app-button>
+                      <app-button
+                        [variant]="'secondary'"
+                        [style]="'outline'"
+                        [size]="'small'"
+                        [disabled]="packageBusyId() === version.id || !canPublish(version)"
+                        (clicked)="publishPackage(version)"
+                        [title]="canPublish(version) ? 'Zbuduj paczkę i wyślij do aplikacji docelowej' : 'Wysyłka dostępna dla wersji zaakceptowanej albo aktywnej (najpierw „Wyślij do weryfikacji” i akceptacja)'">
+                        {{ version.deliveredAt ? 'Wyślij ponownie' : 'Wyślij do aplikacji' }}
+                      </app-button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </details>
+      </div>
+    }
+
+    @if (!isLoading() && !project()) {
+      <app-empty-state
+        icon="error"
+        tone="error"
+        title="Nie udało się wczytać projektu"
+        [message]="loadError() || 'Spróbuj ponownie za chwilę albo wróć do listy projektów.'"
+        [actionLabel]="'Spróbuj ponownie'"
+        (actionClick)="retry()">
+        <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="goBackToList()">{{ backLabel() }}</app-button>
+      </app-empty-state>
+    }
+  </div>
+</app-page-layout>

@@ -1,0 +1,266 @@
+<section class="wizard-step summary-step">
+  <h1 class="summary-step__title">Podsumowanie</h1>
+
+  @if (submissionIssues.length > 0) {
+    <div class="submission-issues" role="alert">
+      <div class="submission-issues__icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <div class="submission-issues__body">
+        <p class="submission-issues__title">
+          Przed wysłaniem do weryfikacji uzupełnij {{ submissionIssues.length === 1 ? '1 pole' : submissionIssues.length + ' pól' }} w kroku „Opis dokumentu"
+        </p>
+        <p class="submission-issues__text">Szkic możesz zapisać i wrócić później — te dane są wymagane dopiero przy finalizacji parametryzacji pisma.</p>
+        <ul class="submission-issues__list">
+          @for (issue of submissionIssues; track issue.field) {
+            <li><span class="submission-issues__section">{{ issue.section }}</span> {{ issue.label }}@if (issue.message) { <span class="submission-issues__msg">— {{ issue.message }}</span>}</li>
+          }
+        </ul>
+      </div>
+      @if (!readOnly) {
+        <div class="submission-issues__actions">
+          <app-button [variant]="'secondary'" [style]="'outline'" [size]="'small'" (clicked)="onFixIssues()">
+            Uzupełnij dane
+          </app-button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Sekcja Ogólne -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Ogólne</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-item__label">Nazwa projektowa pisma</span>
+          <span class="summary-item__value">{{ data.general.documentName || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Automatyczny identyfikator (source)</span>
+          <span class="summary-item__value">{{ data.general.sourceIdentifier || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Nazwa aplikacji / systemu źródła danych</span>
+          <span class="summary-item__value">{{ data.general.applicationName || '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Sekcja Dane biznesowe -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Dane biznesowe</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <div class="summary-grid summary-grid--three">
+        <div class="summary-item">
+          <span class="summary-item__label">Nazwa procesu lub pod-procesu</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.processName')">{{ data.business.processName || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Właściciel procesu</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.processOwner')">{{ data.business.processOwner || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Linia biznesowa</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.businessLine')">{{ getBusinessLineText() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Zespół (tenant)</span>
+          <span class="summary-item__value">{{ tenantName() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Krok procesu</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.processStep')">{{ data.business.processStep || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Wersja procesu</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.processVersion')">{{ data.business.processVersion || '-' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Stan procesu</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('business.status')">{{ getStatusText() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Odbiorca</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('general.recipient')">{{ getRecipientText() }}</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Sekcja Retencja danych -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Retencja danych</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <div class="summary-grid summary-grid--single">
+        <div class="summary-item">
+          <span class="summary-item__label">Ilość dni przechowywania</span>
+          <span class="summary-item__value" [class.summary-item__value--missing]="isMissing('general.retentionDays')">{{ data.general.retentionDays || '-' }} dni</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Sekcja Szablon i schemat -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Szablon i schemat danych</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-item__label">Szablon dokumentu</span>
+          <span class="summary-item__value">{{ getTemplateText() }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-item__label">Format wyjściowy</span>
+          <span class="summary-item__value">{{ data.templateAndSchema.outputFormat?.toUpperCase() || '-' }}</span>
+        </div>
+      </div>
+
+      @if (detectedElements().length > 0) {
+        <div class="detected-elements">
+          <h3 class="detected-elements__title">Znalezione elementy w dokumencie ({{ detectedElements().length }})</h3>
+          <d2-grid
+            [columns]="elementColumns"
+            [rows]="detectedElements()"
+            [showColumnFilters]="false"
+            [pageSize]="10"
+            caption="Znalezione elementy w dokumencie">
+            <ng-template d2GridCell="name" let-element>
+              <span class="d2-mono element-name">{{ element.name }}</span>
+            </ng-template>
+            <ng-template d2GridCell="label" let-element>
+              <span [class]="'d2-type-badge ' + badgeClass(element.kind)" [title]="element.kind !== 'placeholder' ? kindHints[element.kind] : 'Znacznik tekstowy <%…%>'">
+                {{ element.label }}
+              </span>
+            </ng-template>
+          </d2-grid>
+        </div>
+      }
+    </div>
+  </details>
+
+  <!-- Sekcja Lista konfiguracji workerów -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Lista konfiguracji mapowania wartości</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+
+      <!-- Tabela d2-grid (D2GuiShared): pełny JSON konfiguracji w rozwijanych szczegółach wiersza („∨”). -->
+      <d2-grid
+        [columns]="workerColumns"
+        [rows]="workers()"
+        [trackBy]="trackWorker"
+        [loading]="isLoadingWorkers()"
+        [showColumnFilters]="false"
+        [pageSize]="10"
+        [labels]="gridLabels"
+        caption="Lista konfiguracji mapowania wartości"
+        emptyMessage="Brak skonfigurowanych workerów">
+        <ng-template d2GridCell="name" let-worker>
+          <span class="d2-mono worker-name">{{ worker.name }}</span>
+        </ng-template>
+        <ng-template d2GridCell="workerType" let-worker>
+          <span class="d2-type-badge" [class.d2-type-badge--placeholder]="worker.workerType === 'Podstaw wartość'">
+            {{ worker.workerType }}
+          </span>
+        </ng-template>
+        <ng-template d2GridCell="configJson" let-worker>
+          <app-worker-mapping-preview
+            [workerType]="worker.workerType"
+            [configJson]="worker.configJson" />
+        </ng-template>
+        <ng-template d2GridDetail let-worker>
+          <div class="d2-json-detail">
+            <div class="d2-json-detail__header">
+              <span>Konfiguracja JSON — <strong>{{ worker.name }}</strong> ({{ worker.workerType }})</span>
+            </div>
+            <pre class="d2-json-detail__pre">{{ prettyJson(worker.configJson) }}</pre>
+          </div>
+        </ng-template>
+      </d2-grid>
+
+    </div>
+  </details>
+
+  <!-- Sekcja Pozostałe informacje -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Pozostałe informacje</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <div class="additional-info">
+        <label for="additionalInfo" class="additional-info__label">
+          Wprowadź dodatkowe informacje których nie uwzględniono w kreatorze
+        </label>
+        <textarea
+          id="additionalInfo"
+          class="additional-info__textarea"
+          placeholder="Wpisz dodatkowe uwagi, informacje lub wymagania..."
+        rows="6"></textarea>
+      </div>
+    </div>
+  </details>
+
+  <!-- Sekcja Generowanie dokumentu -->
+  <details class="summary-section" open>
+    <summary class="summary-section__header">
+      <h2 class="summary-section__title">Generowanie dokumentu</h2>
+      <svg class="summary-section__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </summary>
+    <div class="summary-section__content">
+      <p class="summary-section__description">Zweryfikuj proces generowania dokumentu przed wysyłką do weryfikacji.</p>
+
+      <div class="test-generation">
+        <div class="test-generation__icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <app-button
+          [variant]="'secondary'"
+          [size]="'small'"
+          [disabled]="readOnly">
+          Test generowania pisma
+        </app-button>
+      </div>
+    </div>
+  </details>
+</section>

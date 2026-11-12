@@ -1,0 +1,255 @@
+<section class="wizard-step">
+  <!-- OGÓLNE -->
+  <h2 class="wizard-step__section-title">Ogólne</h2>
+  <p class="wizard-step__section-subtitle">
+    Niezbędne dane do dodania nowego dokumentu.
+  </p>
+
+  <div class="wizard-step__grid" [formGroup]="generalGroup">
+    <div class="form-field">
+      <label for="documentName" class="form-field__label">
+        Nazwa projektowa pisma <span class="form-field__required">*</span>
+      </label>
+      <input
+        id="documentName"
+        type="text"
+        class="form-field__control"
+        [class.form-field__control--error]="generalGroup.get('documentName')?.invalid && generalGroup.get('documentName')?.touched"
+        formControlName="documentName" />
+        @if (generalGroup.get('documentName')?.invalid && generalGroup.get('documentName')?.touched) {
+          <span class="form-field__error">
+            To pole jest wymagane
+          </span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="applicationName" class="form-field__label">
+          Nazwa aplikacji / systemu źródła danych <span class="form-field__required">*</span>
+        </label>
+        <input
+          id="applicationName"
+          type="text"
+          class="form-field__control"
+          [class.form-field__control--error]="generalGroup.get('applicationName')?.invalid && generalGroup.get('applicationName')?.touched"
+          formControlName="applicationName" />
+          @if (generalGroup.get('applicationName')?.invalid && generalGroup.get('applicationName')?.touched) {
+            <span class="form-field__error">
+              To pole jest wymagane
+            </span>
+          }
+        </div>
+
+        <div class="form-field form-field--with-button">
+          <label for="sourceIdentifier" class="form-field__label">
+            Automatyczny identyfikator (source)
+          </label>
+          <div class="form-field__input-group">
+            <input
+              id="sourceIdentifier"
+              type="text"
+              class="form-field__control"
+              formControlName="sourceIdentifier"
+              readonly />
+              <button
+                type="button"
+                class="form-field__copy-button"
+                (click)="copySourceIdentifier()"
+                title="Kopiuj identyfikator">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DANE BIZNESOWE -->
+        <h2 class="wizard-step__section-title">Dane biznesowe</h2>
+        <p class="wizard-step__section-subtitle">
+          Opis i przeznaczenie biznesowe dokumentu.
+          <span class="wizard-step__section-note">Pola opcjonalne na etapie pracy nad projektem — wymagane przed wysłaniem do weryfikacji.</span>
+        </p>
+
+        <div class="wizard-step__grid" [formGroup]="businessGroup">
+          <div class="form-field">
+            <label for="processName" class="form-field__label">
+              Nazwa procesu lub pod-procesu <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+            </label>
+            <input
+              id="processName"
+              type="text"
+              class="form-field__control"
+              [class.form-field__control--error]="businessGroup.get('processName')?.invalid && businessGroup.get('processName')?.touched"
+              formControlName="processName" />
+            </div>
+
+            <div class="form-field">
+              <label for="processOwner" class="form-field__label">
+                Właściciel procesu <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+              </label>
+              <input
+                id="processOwner"
+                type="text"
+                class="form-field__control"
+                [class.form-field__control--error]="businessGroup.get('processOwner')?.invalid && businessGroup.get('processOwner')?.touched"
+                formControlName="processOwner" />
+              </div>
+
+              <div class="form-field">
+                <label for="businessLine" class="form-field__label">
+                  Linia biznesowa <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                </label>
+                <select
+                  id="businessLine"
+                  class="form-field__control"
+                  [class.form-field__control--error]="businessGroup.get('businessLine')?.invalid && businessGroup.get('businessLine')?.touched"
+                  formControlName="businessLine"
+                  [disabled]="isLoadingBusinessLines()">
+                  <option [value]="null" disabled selected hidden>
+                    {{ isLoadingBusinessLines() ? 'Ładowanie...' : 'Wybierz opcję' }}
+                  </option>
+                  @for (line of businessLines(); track line) {
+                    <option [value]="line.code">
+                      {{ line.name }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="processVersion" class="form-field__label">
+                  Wersja procesu <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                </label>
+                <input
+                  id="processVersion"
+                  type="text"
+                  class="form-field__control"
+                  [class.form-field__control--error]="businessGroup.get('processVersion')?.invalid && businessGroup.get('processVersion')?.touched"
+                  formControlName="processVersion" />
+                </div>
+
+                <div class="form-field">
+                  <label for="processStep" class="form-field__label">
+                    Krok procesu <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                  </label>
+                  <input
+                    id="processStep"
+                    type="text"
+                    class="form-field__control"
+                    [class.form-field__control--error]="businessGroup.get('processStep')?.invalid && businessGroup.get('processStep')?.touched"
+                    formControlName="processStep" />
+                  </div>
+
+                  <div class="form-field">
+                    <label for="status" class="form-field__label">
+                      Stan <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                    </label>
+                    <select
+                      id="status"
+                      class="form-field__control"
+                      [class.form-field__control--error]="businessGroup.get('status')?.invalid && businessGroup.get('status')?.touched"
+                      formControlName="status"
+                      [disabled]="isLoadingStatuses()">
+                      <option value="" disabled selected hidden>
+                        {{ isLoadingStatuses() ? 'Ładowanie...' : 'Wybierz opcję' }}
+                      </option>
+                      @for (status of statuses(); track status) {
+                        <option [value]="status.code">
+                          {{ status.name }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="wizard-step__grid">
+                  <div class="form-field" [formGroup]="businessGroup">
+                    <label for="tenant" class="form-field__label">
+                      Tenant
+                    </label>
+                    <app-tenant-selector
+                      formControlName="tenant"
+                      (createNewTenant)="onCreateNewTenant()">
+                    </app-tenant-selector>
+                  </div>
+
+                  <div class="form-field" [formGroup]="generalGroup">
+                    <label for="recipient" class="form-field__label">
+                      Odbiorca <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                    </label>
+                    <select
+                      id="recipient"
+                      class="form-field__control"
+                      [class.form-field__control--error]="generalGroup.get('recipient')?.invalid && generalGroup.get('recipient')?.touched"
+                      formControlName="recipient"
+                      [disabled]="isLoadingRecipients()">
+                      <option [value]="null" disabled selected hidden>
+                        {{ isLoadingRecipients() ? 'Ładowanie...' : 'Wybierz opcję' }}
+                      </option>
+                      @for (recipient of recipients(); track recipient) {
+                        <option [value]="recipient.code">
+                          {{ recipient.name }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- RETENCJA -->
+                <h2 class="wizard-step__section-title">Retencja danych</h2>
+                <p class="wizard-step__section-subtitle">
+                  Dane wysyłane do systemu podlegają retencji, maksymalny czas przechowywania
+                  danych to 90 dni.
+                  <span class="wizard-step__section-note">Pole opcjonalne na etapie pracy — wymagane przed wysłaniem do weryfikacji.</span>
+                </p>
+
+                <div class="wizard-step__grid" [formGroup]="generalGroup">
+                  <div class="form-field">
+                    <label for="retentionDays" class="form-field__label">
+                      Ilość dni przechowywania <span class="form-field__optional" title="Wymagane dopiero przed wysłaniem do weryfikacji">(do wysyłki)</span>
+                    </label>
+                    <input
+                      id="retentionDays"
+                      type="number"
+                      min="1"
+                      class="form-field__control"
+                      [class.form-field__control--error]="generalGroup.get('retentionDays')?.invalid && generalGroup.get('retentionDays')?.touched"
+                      formControlName="retentionDays" />
+                      @if (generalGroup.get('retentionDays')?.invalid && generalGroup.get('retentionDays')?.touched) {
+                        <span class="form-field__error">
+                          Podaj liczbę dni od 1 do 3650
+                        </span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- ŚRODOWISKA -->
+                  <!-- Sekcja ukryta - informacja o środowiskach
+                  <h2 class="wizard-step__section-title">Środowiska</h2>
+                  <p class="wizard-step__section-subtitle">
+                    Wskaż na których środowiskach dokument powinien zostać wdrożony.
+                  </p>
+
+                  <div class="wizard-step__environments">
+                    <label
+                      *ngFor="let env of environmentOptions"
+                      class="wizard-step__environment-pill">
+                      <input
+                        type="checkbox"
+                        [checked]="isEnvironmentSelected(env)"
+                        (change)="onEnvironmentToggle(env, $event.target.checked)" />
+                        <span>{{ env }}</span>
+                      </label>
+                    </div>
+                    -->
+                  </section>
+
+                  <!-- Modal tworzenia nowego teamu -->
+                  @if (showCreateTenantModal()) {
+                    <app-create-tenant-modal
+                      (created)="onTenantCreated($any($event))"
+                      (close)="onModalClose()">
+                    </app-create-tenant-modal>
+                  }

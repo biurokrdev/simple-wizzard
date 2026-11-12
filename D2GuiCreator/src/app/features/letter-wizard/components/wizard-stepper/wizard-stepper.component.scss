@@ -1,0 +1,160 @@
+@use "tokens";
+@use "mixins";
+
+$circle-size: 48px;
+$line-height: 2px;
+
+.wizard-stepper {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #ececec;
+}
+
+/* Lista kroków */
+.wizard-stepper__list {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  position: relative;
+}
+
+.wizard-stepper__item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+
+  /* Linia łącząca między krokami */
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: calc($circle-size / 2);
+    left: calc(50% + $circle-size / 2 + 20px);
+    width: calc(100% - $circle-size - 40px);
+    height: $line-height;
+    background: #4d0020;
+    z-index: 0;
+  }
+
+  /* Linia dla ukończonych kroków */
+  &.done:not(:last-child)::after {
+    background: #4d0020;
+  }
+}
+
+/* Przycisk + kółko + label */
+.wizard-stepper__button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+/* Kółko kroku */
+.wizard-stepper__circle {
+  width: $circle-size;
+  height: $circle-size;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: #999;
+}
+
+.wizard-stepper__label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 400;
+  max-width: 150px;
+  line-height: 1.3;
+}
+
+/* TODO = szare */
+.wizard-stepper__item.todo .wizard-stepper__circle {
+  border-color: #4d0020;
+  background: #fff;
+  color: #4d0020;
+}
+
+.wizard-stepper__item.todo .wizard-stepper__label {
+  color: #4d0020;
+  font-weight: 400;
+}
+
+/* IN-PROGRESS (aktywny) = pomarańczowe wypełnienie (Orange - dominujący) */
+.wizard-stepper__item.in-progress .wizard-stepper__circle {
+  background: tokens.$color-primary;
+  border-color: tokens.$color-primary;
+  color: #fff;
+  font-weight: 600;
+}
+
+.wizard-stepper__item.in-progress .wizard-stepper__label {
+  color: tokens.$color-primary;
+  font-weight: 600;
+}
+
+/* ACCEPTED (zaakceptowany) = zielone z checkmarkiem */
+.wizard-stepper__item.accepted .wizard-stepper__circle {
+  background: #4CAF5D;
+  border-color: #4CAF5D;
+  color: #fff;
+  font-weight: 500;
+}
+
+.wizard-stepper__item.accepted .wizard-stepper__label {
+  color: #333;
+  font-weight: 400;
+}
+
+/* --- WARIANT MOBILNY --- */
+@media (max-width: 768px) {
+  .wizard-stepper {
+    margin-bottom: 1.5rem;
+  }
+
+  .wizard-stepper__list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .wizard-stepper__item {
+    width: 100%;
+    justify-content: flex-start;
+
+    /* Usuń linie na mobile */
+    &::after {
+      display: none;
+    }
+  }
+
+  .wizard-stepper__button {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .wizard-stepper__label {
+    text-align: left;
+  }
+}

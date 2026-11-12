@@ -1,0 +1,86 @@
+<section class="wizard-step">
+  <div class="step-section">
+    <div [formGroup]="group"></div>
+
+    <div class="step-section__header">
+      <h3 class="step-section__title">Lista konfiguracji mapowania wartości</h3>
+      <p class="step-section__subtitle">
+        Automatycznie wygenerowane workers na podstawie formantów tekstowych z dokumentu
+      </p>
+    </div>
+
+    <!-- Tabela mapowań: d2-grid (D2GuiShared) — wyszukiwarka, filtry kolumnowe, sortowanie, strony,
+         a pełny JSON konfiguracji w rozwijanych szczegółach wiersza (przycisk „∨”). -->
+    <d2-grid
+      [columns]="columns()"
+      [rows]="workers()"
+      [trackBy]="trackWorker"
+      [loading]="isLoadingWorkers()"
+      [pageSize]="10"
+      [labels]="gridLabels"
+      caption="Lista konfiguracji mapowania wartości"
+      emptyMessage="Nie znaleziono żadnych workers. Kliknij „Dodaj worker”, aby utworzyć nowy, lub upewnij się, że dokument zawiera formanty tekstowe.">
+
+      @if (!readOnly()) {
+      <button d2GridActions type="button" class="d2-link-action" (click)="addWorker()">
+        <span class="d2-link-action__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+          </svg>
+        </span>
+        Dodaj worker
+      </button>
+      }
+
+      <ng-template d2GridCell="name" let-worker>
+        <span class="d2-mono worker-name">{{ worker.name }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="workerType" let-worker>
+        <span class="d2-type-badge" [class.d2-type-badge--placeholder]="worker.workerType === 'Podstaw wartość'">
+          {{ worker.workerType }}
+        </span>
+      </ng-template>
+
+      <ng-template d2GridCell="configJson" let-worker>
+        <app-worker-mapping-preview
+          [workerType]="worker.workerType"
+          [configJson]="worker.configJson" />
+      </ng-template>
+
+      <ng-template d2GridCell="actions" let-worker>
+        <div class="d2-row-actions">
+          <button type="button" class="d2-row-button" (click)="editWorker(worker)">Edytuj</button>
+          <button
+            type="button"
+            class="d2-row-icon d2-row-icon--danger"
+            (click)="deleteWorker(worker)"
+            title="Usuń"
+            [attr.aria-label]="'Usuń worker ' + worker.name">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+              <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+          </button>
+        </div>
+      </ng-template>
+
+      <ng-template d2GridDetail let-worker>
+        <div class="d2-json-detail">
+          <div class="d2-json-detail__header">
+            <span>Konfiguracja JSON — <strong>{{ worker.name }}</strong> ({{ worker.workerType }})</span>
+          </div>
+          <pre class="d2-json-detail__pre">{{ prettyJson(worker.configJson) }}</pre>
+        </div>
+      </ng-template>
+    </d2-grid>
+  </div>
+
+  <!-- Worker Dialog -->
+  <app-visual-worker-dialog
+    [isOpen]="isDialogOpen()"
+    [worker]="editingWorker()"
+    (close)="closeDialog()"
+    (save)="saveWorker($event)">
+  </app-visual-worker-dialog>
+</section>

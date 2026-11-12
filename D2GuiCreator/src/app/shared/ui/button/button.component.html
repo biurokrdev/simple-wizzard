@@ -1,0 +1,18 @@
+<button
+  [type]="type()"
+  [disabled]="disabled()"
+  [ngClass]="getButtonClasses()"
+  (click)="onClick($event)"
+>
+  @if (icon() && iconPosition() === 'left') {
+    <span class="btn__icon btn__icon--left">{{ icon() }}</span>
+  }
+  
+  <span class="btn__text">
+    <ng-content></ng-content>
+  </span>
+  
+  @if (icon() && iconPosition() === 'right') {
+    <span class="btn__icon btn__icon--right">{{ icon() }}</span>
+  }
+</button>

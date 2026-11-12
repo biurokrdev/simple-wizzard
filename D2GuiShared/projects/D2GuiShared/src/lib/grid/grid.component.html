@@ -1,0 +1,412 @@
+<!--
+  Struktura kontrolki:
+  1. panel filtrów   - listy rozwijane + czyszczenie filtrów,
+  2. pasek narzędzi  - wyszukiwanie globalne + akcje aplikacji (projekcja treści),
+  3. tabela          - nagłówki (sortowanie), filtry kolumnowe, wiersze danych
+                       oraz panel szczegółów wiersza (schowane kolumny po
+                       zwężeniu ekranu i/lub własny szablon d2GridDetail),
+  4. stopka          - rozmiar strony, podsumowanie zakresu i stronicowanie.
+
+  W trakcie ładowania każdy z tych obszarów pokazuje szkielet w miejscu swoich
+  właściwych elementów, więc układ nie zmienia się po nadejściu danych.
+-->
+@if (filterFields().length > 0) {
+  <div class="d2-grid__filters">
+    @if (loading()) {
+      <span class="d2-grid__skeleton d2-grid__skeleton--button"></span>
+      <div class="d2-grid__filters-fields">
+        @for (field of filterFields(); track field.key) {
+          <span class="d2-grid__skeleton d2-grid__skeleton--field"></span>
+        }
+      </div>
+    } @else {
+      <div class="d2-grid__filters-bar">
+        <button
+          type="button"
+          class="d2-grid__filters-toggle"
+          [attr.aria-expanded]="filtersVisible()"
+          (click)="toggleFilters()"
+        >
+          <span class="d2-grid__filters-icon" aria-hidden="true">&#9776;</span>
+          {{ filtersVisible() ? texts().hideFilters : texts().showFilters }}
+        </button>
+
+        @if (activeFilterCount() > 0) {
+          <button type="button" class="d2-grid__filters-clear" (click)="clearFilters()">
+            <span aria-hidden="true">&#10005;</span> {{ clearFiltersLabel() }}
+          </button>
+        }
+      </div>
+
+      @if (filtersVisible()) {
+        <div class="d2-grid__filters-fields">
+          @for (field of filterFields(); track field.key) {
+            <label class="d2-grid__filters-field">
+              <span class="d2-grid__filters-label">{{ field.label }}</span>
+              <select
+                class="d2-grid__filters-select"
+                [value]="fieldFilter(field.key)"
+                (change)="setFieldFilter(field.key, inputValue($event))"
+              >
+                <option value="" [selected]="fieldFilter(field.key) === ''">
+                  {{ texts().anyOption }}
+                </option>
+                @for (option of field.options; track option.value) {
+                  <option
+                    [value]="option.value"
+                    [selected]="fieldFilter(field.key) === option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                }
+              </select>
+            </label>
+          }
+        </div>
+      }
+    }
+  </div>
+}
+
+<!-- Pasek narzędzi jest w DOM zawsze (projekcja akcji), a CSS chowa go, gdy nie ma ani
+     wyszukiwarki, ani akcji aplikacji (:has). -->
+<div class="d2-grid__toolbar">
+  @if (searchable()) {
+    <div class="d2-grid__search">
+      @if (loading()) {
+        <span class="d2-grid__skeleton d2-grid__skeleton--search"></span>
+      } @else {
+        <svg class="d2-grid__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6" />
+          <line x1="15.5" y1="15.5" x2="20" y2="20" />
+        </svg>
+        <input
+          class="d2-grid__search-input"
+          type="search"
+          [attr.aria-label]="texts().search"
+          [placeholder]="texts().search"
+          [value]="state().search"
+          [disabled]="searchLocked()"
+          (input)="setSearch(inputValue($event))"
+        />
+      }
+    </div>
+  }
+
+  <div class="d2-grid__toolbar-actions">
+    @if (loading()) {
+      <span class="d2-grid__skeleton d2-grid__skeleton--action"></span>
+    }
+    <!-- Akcje aplikacji zostają w drzewie, ale na czas ładowania są ukryte. -->
+    <span class="d2-grid__projected" [class.d2-grid__projected--hidden]="loading()">
+      <ng-content select="[d2GridActions]" />
+    </span>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="d2-grid__sr-only" role="status">{{ texts().loading }}</p>
+}
+
+<div class="d2-grid__scroll">
+  <table class="d2-grid__table">
+    @if (caption()) {
+      <caption class="d2-grid__sr-only">{{ caption() }}</caption>
+    }
+
+    <thead class="d2-grid__head">
+      <tr class="d2-grid__head-row">
+        @if (selectable()) {
+          <th scope="col" class="d2-grid__head-cell d2-grid__select-cell">
+            @if (selection() === 'multiple' && !loading()) {
+              <input
+                type="checkbox"
+                class="d2-grid__checkbox"
+                [attr.aria-label]="texts().selectAll"
+                [checked]="allOnPageSelected()"
+                [indeterminate]="someOnPageSelected()"
+                (change)="togglePageSelection()"
+              />
+            }
+          </th>
+        }
+        @for (column of visibleColumns(); track column.key) {
+          <th
+            scope="col"
+            class="d2-grid__head-cell"
+            [class]="'d2-grid__cell--' + (column.align ?? 'left')"
+            [style.width]="column.width"
+            [attr.aria-sort]="loading() ? null : ariaSort(column)"
+          >
+            @if (loading()) {
+              <span class="d2-grid__skeleton d2-grid__skeleton--header"></span>
+            } @else if (column.sortable) {
+              <button
+                type="button"
+                class="d2-grid__sort"
+                [attr.aria-label]="columnLabel(texts().sortBy, column)"
+                (click)="toggleSort(column)"
+              >
+                <span [class.d2-grid__sr-only]="column.headerHidden">{{ column.header }}</span>
+                <span
+                  class="d2-grid__sort-icon"
+                  [class.d2-grid__sort-icon--asc]="sortDirection(column) === 'asc'"
+                  [class.d2-grid__sort-icon--desc]="sortDirection(column) === 'desc'"
+                  aria-hidden="true"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <g class="d2-grid__sort-up">
+                      <line x1="5" y1="14" x2="5" y2="2" />
+                      <polyline points="2,5 5,2 8,5" />
+                    </g>
+                    <g class="d2-grid__sort-down">
+                      <line x1="11" y1="2" x2="11" y2="14" />
+                      <polyline points="8,11 11,14 14,11" />
+                    </g>
+                  </svg>
+                </span>
+              </button>
+            } @else {
+              <span [class.d2-grid__sr-only]="column.headerHidden">{{ column.header }}</span>
+            }
+          </th>
+        }
+        @if (expandable()) {
+          <th scope="col" class="d2-grid__head-cell d2-grid__expander-cell">
+            <span class="d2-grid__sr-only">{{ texts().expandRow }}</span>
+          </th>
+        }
+      </tr>
+
+      @if (showColumnFilters()) {
+        <tr class="d2-grid__filter-row">
+          @if (selectable()) {
+            <th class="d2-grid__filter-cell d2-grid__select-cell"></th>
+          }
+          @for (column of visibleColumns(); track column.key) {
+            <th class="d2-grid__filter-cell">
+              @if (column.filterable) {
+                @if (loading()) {
+                  <span class="d2-grid__skeleton d2-grid__skeleton--filter"></span>
+                } @else {
+                  <span class="d2-grid__filter">
+                    <input
+                      class="d2-grid__filter-input"
+                      type="search"
+                      [attr.aria-label]="columnLabel(texts().filterColumn, column)"
+                      [value]="columnFilter(column.key)"
+                      [disabled]="columnFiltersLocked()"
+                      (input)="setColumnFilter(column.key, inputValue($event))"
+                    />
+                    @if (columnFilter(column.key)) {
+                      <!-- Wypełniony filtr można wyczyścić jednym kliknięciem. -->
+                      <button
+                        type="button"
+                        class="d2-grid__filter-clear"
+                        [attr.aria-label]="columnLabel(texts().clearColumnFilter, column)"
+                        (click)="clearColumnFilter(column.key)"
+                      >
+                        &#10005;
+                      </button>
+                    } @else {
+                      <svg class="d2-grid__filter-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="11" cy="11" r="6" />
+                        <line x1="15.5" y1="15.5" x2="20" y2="20" />
+                      </svg>
+                    }
+                  </span>
+                }
+              }
+            </th>
+          }
+          @if (expandable()) {
+            <th class="d2-grid__filter-cell d2-grid__expander-cell"></th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <tbody class="d2-grid__body">
+      @if (loading()) {
+        <!-- Szkielet: układ tabeli jest gotowy, zanim dojadą dane. -->
+        @for (placeholder of skeletonPlaceholders(); track placeholder) {
+          <tr class="d2-grid__skeleton-row" aria-hidden="true">
+            @if (selectable()) {
+              <td class="d2-grid__cell d2-grid__select-cell">
+                <span class="d2-grid__skeleton d2-grid__skeleton--checkbox"></span>
+              </td>
+            }
+            @for (column of visibleColumns(); track column.key) {
+              <td class="d2-grid__cell"><span class="d2-grid__skeleton"></span></td>
+            }
+            @if (expandable()) {
+              <td class="d2-grid__cell"><span class="d2-grid__skeleton"></span></td>
+            }
+          </tr>
+        }
+      } @else {
+        @for (row of pageRows(); track trackRow($index, row); let index = $index) {
+          <tr
+            class="d2-grid__row"
+            [class.d2-grid__row--expanded]="isRowExpanded(row, index)"
+            [class.d2-grid__row--selected]="isRowSelected(row, index)"
+            [class.d2-grid__row--clickable]="rowClickable()"
+            (click)="onRowClick($event, row)"
+          >
+            @if (selectable()) {
+              <td class="d2-grid__cell d2-grid__select-cell">
+                <input
+                  class="d2-grid__checkbox"
+                  [type]="selection() === 'single' ? 'radio' : 'checkbox'"
+                  [attr.aria-label]="texts().selectRow"
+                  [checked]="isRowSelected(row, index)"
+                  (change)="toggleRowSelection(row, index)"
+                />
+              </td>
+            }
+            @for (column of visibleColumns(); track column.key) {
+              <td class="d2-grid__cell" [class]="'d2-grid__cell--' + (column.align ?? 'left')">
+                @if (cellTemplate(column.key); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="cellContext(row, column, index)"
+                  />
+                } @else {
+                  {{ text(column, row) }}
+                }
+              </td>
+            }
+            @if (expandable()) {
+              <td class="d2-grid__cell d2-grid__expander-cell">
+                <button
+                  type="button"
+                  class="d2-grid__expander"
+                  [class.d2-grid__expander--open]="isRowExpanded(row, index)"
+                  [attr.aria-expanded]="isRowExpanded(row, index)"
+                  [attr.aria-label]="
+                    isRowExpanded(row, index) ? texts().collapseRow : texts().expandRow
+                  "
+                  (click)="toggleRow(row, index)"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="3,6 8,11 13,6" />
+                  </svg>
+                </button>
+              </td>
+            }
+          </tr>
+
+          @if (expandable() && isRowExpanded(row, index)) {
+            <tr class="d2-grid__detail-row">
+              <td class="d2-grid__detail" [attr.colspan]="columnCount()">
+                @if (detailColumns().length > 0) {
+                  <dl class="d2-grid__detail-list">
+                    @for (column of detailColumns(); track column.key) {
+                      <div class="d2-grid__detail-item">
+                        <dt>{{ column.header }}</dt>
+                        <dd>
+                          @if (cellTemplate(column.key); as template) {
+                            <ng-container
+                              [ngTemplateOutlet]="template"
+                              [ngTemplateOutletContext]="cellContext(row, column, index)"
+                            />
+                          } @else {
+                            {{ text(column, row) }}
+                          }
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                }
+                @if (detailTemplate(); as template) {
+                  <!-- Własny panel szczegółów aplikacji (np. pełny JSON konfiguracji). -->
+                  <div class="d2-grid__detail-custom">
+                    <ng-container
+                      [ngTemplateOutlet]="template"
+                      [ngTemplateOutletContext]="detailContext(row, index)"
+                    />
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr class="d2-grid__message-row">
+            <td class="d2-grid__message" [attr.colspan]="columnCount()">{{ emptyText() }}</td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="d2-grid__footer">
+  @if (loading()) {
+    <span class="d2-grid__skeleton d2-grid__skeleton--page-size"></span>
+    <span class="d2-grid__skeleton d2-grid__skeleton--pagination"></span>
+  } @else {
+    <label class="d2-grid__page-size">
+      {{ texts().pageSize }}
+      <select
+        class="d2-grid__page-size-select"
+        [value]="state().pageSize"
+        (change)="setPageSize(+inputValue($event))"
+      >
+        @for (option of pageSizeOptions(); track option) {
+          <option [value]="option" [selected]="option === state().pageSize">{{ option }}</option>
+        }
+      </select>
+    </label>
+
+    <div class="d2-grid__pagination">
+      <span class="d2-grid__summary">{{ summary() }}</span>
+
+      <nav class="d2-grid__pages" [attr.aria-label]="texts().pagination">
+        <button
+          type="button"
+          class="d2-grid__page-button d2-grid__page-button--arrow"
+          [attr.aria-label]="texts().previousPage"
+          [disabled]="currentPage().page === 1"
+          (click)="previousPage()"
+        >
+          &lsaquo;
+        </button>
+
+        @for (token of pageButtons(); track $index) {
+          @if (token !== 'ellipsis') {
+            <button
+              type="button"
+              class="d2-grid__page-button"
+              [class.d2-grid__page-button--active]="token === currentPage().page"
+              [attr.aria-label]="pageLabel(token)"
+              [attr.aria-current]="token === currentPage().page ? 'page' : null"
+              (click)="goToPage(token)"
+            >
+              {{ token }}
+            </button>
+          } @else {
+            <span class="d2-grid__page-ellipsis" aria-hidden="true">&hellip;</span>
+          }
+        }
+
+        <button
+          type="button"
+          class="d2-grid__page-button d2-grid__page-button--arrow"
+          [attr.aria-label]="texts().nextPage"
+          [disabled]="currentPage().page === currentPage().pageCount"
+          (click)="nextPage()"
+        >
+          &rsaquo;
+        </button>
+      </nav>
+    </div>
+  }
+</div>
+
+<!-- Pasek zaznaczenia: licznik i akcje aplikacji dla wybranych wierszy. -->
+@if (selectable() && selectedCount() > 0 && !loading()) {
+  <div class="d2-grid__selection-bar">
+    <span class="d2-grid__selection-count">{{ selectionSummary() }}</span>
+    <ng-content select="[d2GridSelectionActions]" />
+  </div>
+}

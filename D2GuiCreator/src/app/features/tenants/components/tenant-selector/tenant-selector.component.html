@@ -1,0 +1,85 @@
+<div class="tenant-selector">
+  <div class="tenant-selector__container">
+    <!-- Selected tenant display / Input trigger -->
+    <div class="tenant-selector__input" (click)="toggleDropdown()" [class.tenant-selector__input--open]="isOpen()" [class.tenant-selector__input--disabled]="disabled()" [attr.aria-disabled]="disabled()">
+      <div class="tenant-selector__value">
+        @if (selectedTenant) {
+          <span class="tenant-selector__tenant-name">{{ selectedTenant.name }}</span>
+          @if (selectedTenant.memberCount > 0) {
+            <span class="tenant-selector__member-count">({{ selectedTenant.memberCount }} członków)</span>
+          }
+        } @else {
+          <span class="tenant-selector__placeholder">Wyszukaj lub dodaj zespół...</span>
+        }
+      </div>
+      
+      <div class="tenant-selector__actions">
+        @if (selectedTenant && !disabled()) {
+          <button 
+            type="button"
+            class="tenant-selector__clear"
+            (click)="clearSelection(); $event.stopPropagation()"
+            title="Wyczyść">
+            ✕
+          </button>
+        }
+        <svg class="tenant-selector__icon" width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Dropdown panel -->
+    @if (isOpen()) {
+      <div class="tenant-selector__dropdown">
+        <!-- Search input -->
+        <div class="tenant-selector__search">
+          <input
+            type="text"
+            class="tenant-selector__search-input"
+            placeholder="🔍 Szukaj zespołu..."
+            [value]="searchTerm()"
+            (input)="onSearchChange($any($event.target).value)"
+            (click)="$event.stopPropagation()">
+        </div>
+
+        <!-- Tenant list -->
+        @if (isLoading()) {
+          <div class="tenant-selector__loading">
+            Ładowanie zespołów...
+          </div>
+        } @else if (filteredTenants().length === 0 && searchTerm()) {
+          <div class="tenant-selector__empty">
+            Nie znaleziono zespołu "{{ searchTerm() }}"
+          </div>
+        } @else {
+          <div class="tenant-selector__list">
+            @for (tenant of filteredTenants(); track tenant.id) {
+              <div 
+                class="tenant-selector__item"
+                [class.tenant-selector__item--selected]="selectedTenant?.id === tenant.id"
+                (click)="selectTenant(tenant)">
+                <div class="tenant-selector__item-content">
+                  <div class="tenant-selector__item-name">{{ tenant.name }}</div>
+                  <div class="tenant-selector__item-info">{{ tenant.memberCount }} członków</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Create new button -->
+        <div class="tenant-selector__footer">
+          <app-button
+            [variant]="'secondary'"
+            [style]="'text'"
+            [fullWidth]="true"
+            (clicked)="onCreateNew()">
+            <span class="tenant-selector__create-icon">+</span>
+            Utwórz nowy zespół
+          </app-button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

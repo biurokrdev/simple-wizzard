@@ -1,0 +1,42 @@
+:host {
+  display: block;
+}
+
+// Szablon: nazwa pliku + znacznik, z której wersji pochodzi (robocza / aktywna)
+.template-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.template-cell__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.template-cell__version {
+  font-size: 12px;
+  color: #6b6b6b;
+
+  &--active {
+    color: #1e8700;
+    font-weight: 600;
+  }
+}
+
+.template-cell__empty {
+  color: #9b9b9b;
+}
+
+// GUID projektu — skracany wielokropkiem, pełna wartość w podpowiedzi
+.project-id {
+  display: inline-block;
+  max-width: 134px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  color: #6b6b6b;
+}

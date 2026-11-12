@@ -1,0 +1,31 @@
+<footer class="status-footer" role="contentinfo">
+  <div class="status-left">
+    <span class="status-item status-copyright">{{ appName() }} &copy; {{ currentYear }} {{ appName() }}</span>
+    @if (tagline()) {
+      <span class="status-separator">|</span>
+      <span class="status-item status-tagline">{{ tagline() }}</span>
+    }
+  </div>
+
+  <div class="status-center">
+    @if (environmentLabel(); as env) {
+      <span class="status-item status-env">{{ env }}</span>
+      @if (hasBuildInfo()) {
+        <span class="status-separator">|</span>
+      }
+    }
+    @if (buildNumber(); as number) {
+      <span class="status-item status-build-number">Wersja: {{ number }}</span>
+    }
+    @if (buildNumber() && buildDate()) {
+      <span class="status-separator">|</span>
+    }
+    @if (buildDate(); as date) {
+      <span class="status-item status-build-date">{{ date }}</span>
+    }
+  </div>
+
+  <div class="status-right">
+    <ng-content />
+  </div>
+</footer>

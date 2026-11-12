@@ -1,0 +1,14 @@
+@if (isVisible()) {
+  <div class="offline-banner" role="alert">
+    <span class="offline-banner__text">{{ message }}</span>
+    <button
+      type="button"
+      class="offline-banner__close"
+      (click)="dismiss()"
+      aria-label="Zamknij powiadomienie"
+      title="Zamknij"
+    >
+      ✕
+    </button>
+  </div>
+}

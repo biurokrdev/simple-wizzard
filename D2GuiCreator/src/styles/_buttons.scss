@@ -1,0 +1,404 @@
+@use 'sass:color';
+@use 'tokens' as *;
+
+/* ========================================
+   SYSTEM PRZYCISKÓW - NOWA PALETA
+   Zgodnie z proporcjami: Orange 50%, Raspberry 20%, Sun 15%, Maroon 15%
+   ======================================== */
+
+// Bazowy styl przycisku
+%button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid transparent;
+  font-size: $font-size-base;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.2;
+
+  &:disabled {
+    background: $color-grey-01 !important;
+    border-color: $color-grey-02 !important;
+    color: $color-grey-02 !important;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* ========================================
+   PRIMARY BUTTON - ORANGE (50% - dominujący)
+   Główne akcje: Wyślij, Zapisz i Kontynuuj, Potwierdź
+   ======================================== */
+
+.btn-primary {
+  @extend %button-base;
+  background: $color-primary;
+  border-color: $color-primary;
+  color: $color-white;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-hover;
+    border-color: $color-primary-hover;
+  }
+
+  &:active:not(:disabled) {
+    background: $color-primary-hover;
+  }
+}
+
+/* ========================================
+   SECONDARY BUTTON - RASPBERRY (20% - akcent wyrazisty)
+   Akcje drugorzędne: Zapisz szkic, Eksportuj, Duplikuj
+   ======================================== */
+
+.btn-secondary {
+  @extend %button-base;
+  background: $color-white;
+  border-color: $color-secondary;
+  color: $color-secondary;
+
+  &:hover:not(:disabled) {
+    background: $color-secondary;
+    border-color: $color-secondary;
+    color: $color-white;
+  }
+
+  &:active:not(:disabled) {
+    background: $color-secondary-hover;
+    border-color: $color-secondary-hover;
+  }
+}
+
+/* Wariant wypełniony */
+.btn-secondary--filled {
+  @extend .btn-secondary;
+  background: $color-secondary;
+  border-color: $color-secondary;
+  color: $color-white;
+
+  &:hover:not(:disabled) {
+    background: $color-secondary-hover;
+    border-color: $color-secondary-hover;
+  }
+}
+
+/* ========================================
+   TERTIARY BUTTON - SUN (15% - akcent ciepły)
+   Akcje pomocnicze: Generuj, API Request, Podgląd
+   ======================================== */
+
+.btn-tertiary {
+  @extend %button-base;
+  background: $color-white;
+  border-color: $color-tertiary-hover;
+  color: $color-tertiary-hover;
+
+  &:hover:not(:disabled) {
+    background: $color-tertiary-hover;
+    border-color: $color-tertiary-hover;
+    color: $color-white;
+  }
+
+  &:active:not(:disabled) {
+    background: color.adjust($color-tertiary-hover, $lightness: -8%);
+  }
+}
+
+/* Wariant wypełniony */
+.btn-tertiary--filled {
+  @extend .btn-tertiary;
+  background: $color-tertiary;
+  border-color: $color-tertiary;
+  color: $color-grey-04;
+
+  &:hover:not(:disabled) {
+    background: $color-tertiary-hover;
+    border-color: $color-tertiary-hover;
+    color: $color-white;
+  }
+}
+
+/* ========================================
+   GHOST BUTTON - MAROON (15% - akcent ciemny)
+   Akcje anulowania: Anuluj, Zamknij, Cofnij
+   ======================================== */
+
+.btn-ghost {
+  @extend %button-base;
+  background: transparent;
+  border-color: $color-secondary;
+  color: $color-secondary;
+
+  &:hover:not(:disabled) {
+    background: $color-secondary;
+    border-color: $color-secondary;
+    color: $color-white;
+  }
+
+  &:active:not(:disabled) {
+    background: $color-secondary-hover;
+    border-color: $color-secondary-hover;
+  }
+}
+
+/* ========================================
+   OUTLINE BUTTON - NEUTRALNY
+   Akcje neutralne bez koloru
+   ======================================== */
+
+.btn-outline {
+  @extend %button-base;
+  background: $color-white;
+  border-color: $color-grey-03;
+  color: $color-grey-03;
+
+  &:hover:not(:disabled) {
+    background: $color-grey-03;
+    border-color: $color-grey-03;
+    color: $color-white;
+  }
+}
+
+/* ========================================
+   NEUTRAL BUTTON - CZARNY TEKST BEZ OBRAMOWANIA
+   Akcje nawigacyjne: Wstecz, Następny krok
+   ======================================== */
+
+.btn-neutral {
+  @extend %button-base;
+  background: transparent;
+  border: none;
+  color: $color-grey-03;
+  padding: 0.75rem 1.5rem;
+
+  &:hover:not(:disabled) {
+    background: $color-grey-01;
+  }
+
+  &:active:not(:disabled) {
+    background: color.adjust($color-grey-01, $lightness: -5%);
+  }
+}
+
+/* ========================================
+   TEXT BUTTON - BEZ OBRAMOWANIA
+   Linki i akcje minimalne
+   ======================================== */
+
+.btn-text {
+  @extend %button-base;
+  background: transparent;
+  border: none;
+  color: $color-primary;
+  padding: 0.5rem 1rem;
+
+  &:hover:not(:disabled) {
+    background: $color-primary-light;
+    text-decoration: underline;
+  }
+
+  &--accent {
+    color: $color-accent;
+
+    &:hover:not(:disabled) {
+      background: $color-accent-light;
+      text-decoration: underline;
+    }
+  }
+
+  &--secondary {
+    color: $color-accent;
+
+    &:hover:not(:disabled) {
+      background: $color-accent-light;
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ========================================
+   DANGER BUTTON - BŁĘDY/USUWANIE
+   ======================================== */
+
+.btn-danger {
+  @extend %button-base;
+  background: $color-red-100;
+  border-color: $color-red-100;
+  color: $color-white;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($color-red-100, $lightness: -8%);
+    border-color: color.adjust($color-red-100, $lightness: -8%);
+  }
+}
+
+.btn-danger--outline {
+  @extend .btn-danger;
+  background: $color-white;
+  color: $color-red-100;
+
+  &:hover:not(:disabled) {
+    background: $color-red-100;
+    border-color: $color-red-100;
+    color: $color-white;
+  }
+}
+
+/* ========================================
+   SUCCESS BUTTON - SUKCES/ZATWIERDZENIE
+   ======================================== */
+
+.btn-success {
+  @extend %button-base;
+  background: $color-green-03;
+  border-color: $color-green-03;
+  color: $color-white;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($color-green-03, $lightness: -8%);
+    border-color: color.adjust($color-green-03, $lightness: -8%);
+  }
+}
+
+.btn-success--outline {
+  @extend .btn-success;
+  background: $color-white;
+  color: $color-green-03;
+
+  &:hover:not(:disabled) {
+    background: $color-green-03;
+    border-color: $color-green-03;
+    color: $color-white;
+  }
+}
+
+/* ========================================
+   ROZMIARY PRZYCISKÓW
+   ======================================== */
+
+.btn--sm {
+  padding: 0.5rem 1rem;
+  font-size: $font-size-sm;
+}
+
+.btn--lg {
+  padding: 1rem 2rem;
+  font-size: $font-size-lg;
+}
+
+.btn--xl {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.125rem;
+}
+
+/* ========================================
+   SZEROKOŚĆ PRZYCISKU
+   ======================================== */
+
+.btn--full {
+  width: 100%;
+}
+
+.btn--auto {
+  width: auto;
+}
+
+/* ========================================
+   PRZYCISKI Z IKONAMI
+   ======================================== */
+
+.btn--icon-only {
+  padding: 0.75rem;
+  aspect-ratio: 1;
+
+  &.btn--sm {
+    padding: 0.5rem;
+  }
+
+  &.btn--lg {
+    padding: 1rem;
+  }
+}
+
+.btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 1.25em;
+    height: 1.25em;
+  }
+}
+
+/* ========================================
+   GRUPOWANIE PRZYCISKÓW
+   ======================================== */
+
+.btn-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  &--end {
+    justify-content: flex-end;
+  }
+
+  &--center {
+    justify-content: center;
+  }
+
+  &--between {
+    justify-content: space-between;
+  }
+
+  &--compact {
+    gap: 0.5rem;
+  }
+}
+
+/* ========================================
+   STANY ŁADOWANIA
+   ======================================== */
+
+.btn--loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: 50%;
+    left: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: btn-spin 0.6s linear infinite;
+  }
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

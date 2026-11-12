@@ -1,0 +1,37 @@
+@D2ServicesCreator_HostAddress = http://localhost:5002
+# Wpisz lokalnie wartosc Secrets:ApiKey (appsettings.Development.json) - nie commituj prawdziwego klucza
+@ApiKey = CHANGE_ME
+@ProjectId = 00000000-0000-0000-0000-000000000000
+@VersionId = 00000000-0000-0000-0000-000000000000
+
+# Health (no API key required)
+GET {{D2ServicesCreator_HostAddress}}/health
+
+###
+
+# Project status — narrowed read model (isActive, activeVersionId, versions[])
+GET {{D2ServicesCreator_HostAddress}}/api/v1/Projects/{{ProjectId}}
+X-Api-Key: {{ApiKey}}
+Accept: application/json
+
+###
+
+# Activate a version (deactivates the previously active one)
+POST {{D2ServicesCreator_HostAddress}}/api/v1/Projects/{{ProjectId}}/versions/{{VersionId}}/activate
+X-Api-Key: {{ApiKey}}
+Accept: application/json
+
+###
+
+# Deactivate a version (project is left without an active version)
+POST {{D2ServicesCreator_HostAddress}}/api/v1/Projects/{{ProjectId}}/versions/{{VersionId}}/deactivate
+X-Api-Key: {{ApiKey}}
+Accept: application/json
+
+###
+
+# Expected 401 — missing key
+GET {{D2ServicesCreator_HostAddress}}/api/v1/Projects/{{ProjectId}}
+Accept: application/json
+
+###

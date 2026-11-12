@@ -1,0 +1,269 @@
+@if (isOpen) {
+  <div class="dialog-overlay" (click)="onCancel()">
+    <div
+      class="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mapping-dialog-title"
+      (click)="$event.stopPropagation()">
+
+      <!-- Nagłówek -->
+      <header class="dialog__header">
+        <div class="dialog__heading">
+          <h2 id="mapping-dialog-title" class="dialog__title">
+            {{ isEditMode() ? 'Edytuj mapowanie' : 'Dodaj nowe mapowanie' }}
+          </h2>
+          <p class="dialog__subtitle">
+            @if (elementName()) {
+              Element <code class="dialog__element">{{ elementName() }}</code>
+            } @else {
+              Powiąż element szablonu z danymi
+            }
+          </p>
+        </div>
+
+        <div class="dialog__header-actions">
+          <div class="segmented" role="tablist" aria-label="Tryb edycji">
+            <button
+              type="button"
+              role="tab"
+              class="segmented__btn"
+              [class.segmented__btn--active]="isVisualMode()"
+              [attr.aria-selected]="isVisualMode()"
+              (click)="setMode(true)">
+              Prosty
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="segmented__btn"
+              [class.segmented__btn--active]="!isVisualMode()"
+              [attr.aria-selected]="!isVisualMode()"
+              (click)="setMode(false)">
+              JSON
+            </button>
+          </div>
+          <button type="button" class="dialog__close" (click)="onCancel()" aria-label="Zamknij">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Treść -->
+      <form [formGroup]="form" class="dialog__body" (ngSubmit)="onSave()">
+
+        <!-- 1. Element -->
+        <section class="block">
+          <div class="field">
+            <label for="mapping-name" class="field__label">
+              Nazwa elementu w dokumencie <span class="field__required">*</span>
+            </label>
+            <input
+              id="mapping-name"
+              type="text"
+              class="field__control field__control--mono"
+              formControlName="name"
+              autocomplete="off"
+              placeholder="np. data_aktualna lub tag_pokaz_regulamin"
+              [class.field__control--error]="controlHasError('name')" />
+            <p class="field__hint">Nazwa placeholdera z <code>&lt;%…%&gt;</code> albo tag kontrolki tekstowej w szablonie Word.</p>
+            @if (controlHasError('name')) {
+              <p class="field__error">Nazwa elementu jest wymagana</p>
+            }
+          </div>
+        </section>
+
+        @if (isVisualMode()) {
+          <!-- 2. Typ operacji -->
+          <section class="block">
+            <div class="block__title">
+              Co ma się stać z tym elementem? <span class="field__required">*</span>
+            </div>
+            <div class="type-grid" role="radiogroup" aria-label="Typ workera">
+              @for (option of typeOptions(); track option.code) {
+                <button
+                  type="button"
+                  role="radio"
+                  class="type-card"
+                  [class.type-card--selected]="selectedTypeCode() === option.code"
+                  [attr.aria-checked]="selectedTypeCode() === option.code"
+                  (click)="selectType(option.code)">
+                  <span class="type-card__icon" [class.type-card__icon--visibility]="option.icon === 'visibility'">
+                    @switch (option.icon) {
+                      @case ('substitution') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="17 1 21 5 17 9"></polyline>
+                          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                          <polyline points="7 23 3 19 7 15"></polyline>
+                          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                        </svg>
+                      }
+                      @case ('visibility') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                          <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                      }
+                      @case ('repeat') {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="4" width="18" height="5" rx="1"></rect>
+                          <rect x="3" y="11" width="18" height="5" rx="1"></rect>
+                          <line x1="3" y1="20" x2="21" y2="20" stroke-dasharray="3 2"></line>
+                        </svg>
+                      }
+                      @default {
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                      }
+                    }
+                  </span>
+                  <span class="type-card__text">
+                    <span class="type-card__name">{{ option.name }}</span>
+                    <span class="type-card__desc">{{ option.description }}</span>
+                  </span>
+                  <span class="type-card__check" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
+                </button>
+              }
+              @if (isLoadingTypes() && typeOptions().length === 0) {
+                <p class="field__hint">Ładowanie typów…</p>
+              }
+            </div>
+          </section>
+
+          <!-- 3. Parametry -->
+          @if (dynamicFields().length > 0) {
+            <section class="block">
+              <div class="block__title">Parametry</div>
+              <div class="fields-grid">
+                @for (field of dynamicFields(); track field.key) {
+                  <div class="field" [class.field--wide]="field.wide">
+                    @if (field.type === 'checkbox') {
+                      <label class="toggle">
+                        <input type="checkbox" class="toggle__input" [formControlName]="field.key" />
+                        <span class="toggle__track" aria-hidden="true"></span>
+                        <span class="toggle__label">{{ field.label }}</span>
+                      </label>
+                    } @else {
+                      <label [for]="'mapping-' + field.key" class="field__label">
+                        {{ field.label }}
+                        @if (field.required) {
+                          <span class="field__required">*</span>
+                        }
+                      </label>
+                      @if (field.type === 'textarea') {
+                        <textarea
+                          [id]="'mapping-' + field.key"
+                          class="field__control field__control--textarea"
+                          [class.field__control--mono]="field.mono"
+                          [class.field__control--error]="controlHasError(field.key)"
+                          [formControlName]="field.key"
+                          [placeholder]="field.placeholder || ''"
+                          rows="2"></textarea>
+                      } @else {
+                        <input
+                          [id]="'mapping-' + field.key"
+                          type="text"
+                          class="field__control"
+                          [class.field__control--mono]="field.mono"
+                          [class.field__control--error]="controlHasError(field.key)"
+                          [formControlName]="field.key"
+                          autocomplete="off"
+                          [placeholder]="field.placeholder || ''" />
+                      }
+                      @if (field.hint) {
+                        <p class="field__hint">{{ field.hint }}</p>
+                      }
+                      @if (controlHasError(field.key)) {
+                        <p class="field__error">To pole jest wymagane</p>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        } @else {
+          <!-- Tryb JSON -->
+          <section class="block">
+            <div class="fields-grid">
+              <div class="field">
+                <label for="mapping-type-json" class="field__label">Typ workera <span class="field__required">*</span></label>
+                <select id="mapping-type-json" class="field__control" formControlName="workerType">
+                  @for (option of typeOptions(); track option.code) {
+                    <option [value]="option.code">{{ option.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="field field--wide">
+              <label for="mapping-json" class="field__label">Konfiguracja JSON <span class="field__required">*</span></label>
+              <textarea
+                id="mapping-json"
+                class="field__control field__control--mono field__control--json"
+                [class.field__control--error]="!!jsonError()"
+                [value]="jsonText()"
+                (input)="onJsonChange($any($event.target).value)"
+                spellcheck="false"
+                rows="10"></textarea>
+              @if (jsonError()) {
+                <p class="field__error">{{ jsonError() }}</p>
+              } @else {
+                <p class="field__hint">Klucze jak w konfiguracji generowanej automatycznie: <code>search_for</code>, <code>replacement_property_expression</code>, <code>tag_name</code>, <code>conditional_expression</code>.</p>
+              }
+            </div>
+          </section>
+        }
+
+        <!-- Podgląd mapowania -->
+        <section class="block block--preview">
+          <div class="preview__header">
+            <span class="block__title">Podgląd mapowania</span>
+            <button
+              type="button"
+              class="preview__json-toggle"
+              [class.is-active]="showJsonPreview()"
+              [attr.aria-expanded]="showJsonPreview()"
+              (click)="toggleJsonPreview()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              {{ showJsonPreview() ? 'Ukryj JSON' : 'Pokaż JSON' }}
+            </button>
+          </div>
+          <div class="preview__body">
+            <app-worker-mapping-preview
+              [workerType]="selectedTypeCode()"
+              [configJson]="jsonText()"
+              [compact]="false" />
+          </div>
+          @if (showJsonPreview()) {
+            <pre class="preview__json">{{ jsonText() }}</pre>
+          }
+        </section>
+      </form>
+
+      <!-- Stopka -->
+      <footer class="dialog__footer">
+        <span class="dialog__footer-note"><span class="field__required">*</span> pola wymagane</span>
+        <div class="dialog__footer-actions">
+          <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="onCancel()">
+            Anuluj
+          </app-button>
+          <app-button [variant]="'primary'" [disabled]="!canSave" (clicked)="onSave()">
+            {{ isEditMode() ? 'Zapisz zmiany' : 'Dodaj mapowanie' }}
+          </app-button>
+        </div>
+      </footer>
+    </div>
+  </div>
+}

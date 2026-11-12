@@ -1,0 +1,15 @@
+{
+  "name": "d2-gui-shared",
+  "version": "0.4.0",
+  "description": "D2GuiShared — wspólny shell GUI aplikacji D2 (Doc2): nagłówek, stopka, banery środowiska i offline, konfiguracja provideD2Gui(), kontrolka listy d2-grid, motyw z paletami (D2ThemeService, styles/_theme.scss).",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "@angular/common": ">=22.1.0 <23.0.0",
+    "@angular/core": ">=22.1.0 <23.0.0",
+    "@angular/router": ">=22.1.0 <23.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}

@@ -1,0 +1,144 @@
+@use 'tokens';
+
+// Flex helpers
+@mixin flex-row($align: center, $justify: flex-start, $gap: tokens.$space-3) {
+  display: flex;
+  align-items: $align;
+  justify-content: $justify;
+  gap: $gap;
+}
+
+@mixin flex-column($gap: tokens.$space-3) {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+}
+
+// Shadowed card
+@mixin card-surface {
+  background: tokens.$color-surface;
+  border-radius: tokens.$radius-md;
+  box-shadow: tokens.$shadow-soft;
+}
+
+// Bordered surface (e.g. header/footer)
+@mixin surface-bordered {
+  background: tokens.$color-surface;
+  border: 1px solid tokens.$color-border-subtle;
+}
+
+// Text ellipsis
+@mixin text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Media queries
+@mixin respond-to($breakpoint) {
+  $value: map-get(tokens.$breakpoints, $breakpoint);
+
+  @if $value {
+    @media (min-width: $value) {
+      @content;
+    }
+  } @else {
+    @warn 'Breakpoint #{$breakpoint} not found in $breakpoints map.';
+  }
+}
+
+// --- Pola formularzy w rozmiarach motywu D2 (styles/_theme.scss w d2-gui-shared) ---------------
+// Używaj zamiast własnych wymiarów: wysokość, promień, ramka, fokus i stan błędu w jednym miejscu.
+@mixin control {
+  width: 100%;
+  height: tokens.$control-height;
+  padding: 0 tokens.$control-padding-x;
+  font: inherit;
+  font-size: tokens.$control-font-size;
+  color: tokens.$color-text-main;
+  background: tokens.$color-surface;
+  border: 1px solid tokens.$color-border-strong;
+  border-radius: tokens.$control-radius;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: tokens.$color-text-muted;
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: tokens.$color-text-main;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: tokens.$color-primary;
+    box-shadow: 0 0 0 3px var(--d2-color-focus);
+  }
+
+  &:disabled {
+    color: tokens.$color-text-main;
+    background: tokens.$color-bg-subtle;
+    border-color: tokens.$color-border-subtle;
+    cursor: default;
+  }
+}
+
+@mixin control-textarea {
+  height: auto;
+  min-height: calc(#{tokens.$control-height} * 2.5);
+  padding: 12px tokens.$control-padding-x;
+  resize: vertical;
+}
+
+@mixin control-error {
+  border-color: var(--d2-color-danger);
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--d2-color-danger);
+  }
+
+  &:focus {
+    border-color: var(--d2-color-danger);
+    box-shadow: 0 0 0 3px var(--d2-color-danger-light);
+  }
+}
+
+@mixin field-label {
+  font-size: var(--d2-label-font-size);
+  font-weight: 600;
+  color: tokens.$color-header;
+}
+
+// Komunikat błędu z czerwoną ikoną „!” (jak w projekcie ekranów D2)
+@mixin field-error {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--d2-color-danger);
+
+  &::before {
+    content: '!';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff;
+    background: var(--d2-color-danger);
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+}
+
+// Biały panel strony na tle motywu
+@mixin panel {
+  padding: tokens.$panel-padding;
+  background: tokens.$color-surface;
+  border: 1px solid tokens.$color-border-subtle;
+  border-radius: tokens.$panel-radius;
+}

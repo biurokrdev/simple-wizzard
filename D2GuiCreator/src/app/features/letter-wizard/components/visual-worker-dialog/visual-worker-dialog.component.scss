@@ -1,0 +1,559 @@
+@use 'tokens';
+
+$border: #e5e7eb;
+$text: #111827;
+$muted: #6b7280;
+$surface: #f9fafb;
+$primary: tokens.$color-primary;
+$primary-soft: #fff7ed;
+$primary-border: #fed7aa;
+$danger: #dc2626;
+$mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+
+/* ───────────── Overlay + okno ───────────── */
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 24px 48px -12px rgba(17, 24, 39, 0.35);
+  overflow: hidden;
+  color: $text;
+}
+
+.dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid $border;
+}
+
+.dialog__heading {
+  min-width: 0;
+}
+
+.dialog__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dialog__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: $muted;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.dialog__element {
+  font-family: $mono;
+  font-size: 0.8125rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 4px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.dialog__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: $muted;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #f3f4f6;
+    color: $text;
+  }
+}
+
+/* Segmented control Prosty / JSON */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 6px;
+  background: #f3f4f6;
+  border: 1px solid $border;
+}
+
+.segmented__btn {
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $muted;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    color: $text;
+  }
+
+  &--active {
+    background: #ffffff;
+    color: $primary;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* ───────────── Treść ───────────── */
+
+.dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 1.25rem;
+  /* globalny styl scrollbara (16px pomarańczowy) jest za ciężki w dialogu */
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+
+  &::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db !important;
+    border: none !important;
+    border-radius: 4px !important;
+  }
+}
+
+.block {
+  padding: 1rem 0;
+  border-bottom: 1px solid $border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.block__title {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $text;
+  letter-spacing: 0.01em;
+}
+
+/* Pola */
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+
+  &--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.field__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.field__required {
+  color: $danger;
+  font-weight: 600;
+}
+
+.field__control {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  font: inherit;
+  font-size: 0.9rem;
+  color: $text;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.15);
+  }
+
+  &--mono {
+    font-family: $mono;
+    font-size: 0.85rem;
+  }
+
+  &--textarea {
+    resize: vertical;
+    min-height: 2.75rem;
+    line-height: 1.45;
+  }
+
+  &--json {
+    min-height: 12rem;
+    line-height: 1.55;
+    background: $surface;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  &--error {
+    border-color: $danger;
+
+    &:focus {
+      border-color: $danger;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+    }
+  }
+}
+
+.field__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: $muted;
+  line-height: 1.4;
+
+  code {
+    font-family: $mono;
+    font-size: 0.72rem;
+    padding: 0 0.25rem;
+    border-radius: 3px;
+    background: #f3f4f6;
+  }
+}
+
+.field__error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: $danger;
+}
+
+/* Karty typu operacji */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.6rem;
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: left;
+  font: inherit;
+  color: $text;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    border-color: #9ca3af;
+    background: $surface;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.25);
+  }
+
+  &--selected {
+    border-color: $primary;
+    background: $primary-soft;
+    box-shadow: inset 0 0 0 1px $primary;
+
+    .type-card__check {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+.type-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+
+  &--visibility {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+}
+
+.type-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.type-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.type-card__desc {
+  font-size: 0.75rem;
+  color: $muted;
+  line-height: 1.35;
+}
+
+.type-card__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: $primary;
+  color: #ffffff;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+/* Przełącznik (checkbox) */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.2rem 0;
+}
+
+.toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+
+  &:focus-visible + .toggle__track {
+    box-shadow: 0 0 0 3px rgba(255, 98, 0, 0.25);
+  }
+
+  &:checked + .toggle__track {
+    background: $primary;
+
+    &::after {
+      transform: translateX(16px);
+    }
+  }
+}
+
+.toggle__track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #d1d5db;
+  transition: background 0.15s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s;
+  }
+}
+
+.toggle__label {
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* Podgląd mapowania */
+.block--preview {
+  padding-bottom: 1.1rem;
+}
+
+.preview__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  .block__title {
+    margin-bottom: 0;
+  }
+}
+
+.preview__json-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  font-family: $mono;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $muted;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #f3f4f6;
+    color: $primary;
+  }
+
+  &.is-active {
+    background: $primary-soft;
+    border-color: $primary-border;
+    color: $primary;
+  }
+}
+
+.preview__body {
+  margin-top: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  background: $surface;
+}
+
+.preview__json {
+  margin: 0.6rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid $primary-border;
+  border-left: 3px solid $primary;
+  border-radius: 6px;
+  background: #ffffff;
+  font-family: $mono;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #1f2937;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ───────────── Stopka ───────────── */
+
+.dialog__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid $border;
+  background: $surface;
+}
+
+.dialog__footer-note {
+  font-size: 0.75rem;
+  color: $muted;
+}
+
+.dialog__footer-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+/* ───────────── Mobile ───────────── */
+
+@media (max-width: 640px) {
+  .dialog-overlay {
+    padding: 0;
+  }
+
+  .dialog {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .dialog__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dialog__header-actions {
+    justify-content: space-between;
+  }
+
+  .fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .dialog__footer-actions {
+      justify-content: stretch;
+
+      app-button {
+        flex: 1;
+      }
+    }
+  }
+}

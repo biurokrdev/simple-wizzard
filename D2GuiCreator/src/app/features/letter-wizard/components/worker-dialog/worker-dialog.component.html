@@ -1,0 +1,86 @@
+@if (isOpen) {
+  <div class="dialog-overlay" (click)="onClose()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog__header">
+        <h2 class="dialog__title">{{ isEditMode ? 'Edytuj worker' : 'Dodaj worker' }}</h2>
+        <button type="button" class="dialog__close" (click)="onClose()">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+          </svg>
+        </button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="onSave()">
+        <div class="dialog__body">
+          <div class="form-field">
+            <label for="name" class="form-field__label">
+              Element <span class="form-field__required">*</span>
+            </label>
+            <input
+              id="name"
+              type="text"
+              class="form-field__control"
+              formControlName="name"
+              placeholder="np. <%data_aktualna%> lub nazwa_kontrolki"
+              [class.form-field__control--error]="form.get('name')?.invalid && form.get('name')?.touched"
+              />
+              @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                <span class="form-field__error">
+                  Element jest wymagany
+                </span>
+              }
+            </div>
+            <div class="form-field">
+              <label for="workerType" class="form-field__label">
+                Typ workera <span class="form-field__required">*</span>
+              </label>
+              <select
+                id="workerType"
+                class="form-field__control"
+                formControlName="workerType"
+                [class.form-field__control--error]="form.get('workerType')?.invalid && form.get('workerType')?.touched"
+                [disabled]="isLoadingTypes()"
+                >
+                <option value="" disabled>{{ isLoadingTypes() ? 'Ładowanie typów...' : 'Wybierz typ workera' }}</option>
+                @for (type of workerTypes(); track type) {
+                  <option [value]="type.code">
+                    {{ type.name }}
+                  </option>
+                }
+              </select>
+              @if (form.get('workerType')?.value) {
+                <span class="form-field__hint">
+                  {{ getSelectedTypeDescription() }}
+                </span>
+              }
+            </div>
+            <div class="form-field">
+              <label for="description" class="form-field__label">
+                Konfiguracja JSON
+              </label>
+              <textarea
+                id="description"
+                class="form-field__control form-field__textarea"
+                formControlName="description"
+                rows="3"
+                placeholder="Opcjonalny opis workera"
+              ></textarea>
+            </div>
+          </div>
+          <div class="dialog__footer">
+            <app-button
+              [variant]="'secondary'"
+              [style]="'outline'"
+              (clicked)="onClose()">
+              Anuluj
+            </app-button>
+            <app-button
+              [variant]="'primary'"
+              [type]="'submit'"
+              [disabled]="form.invalid">
+              {{ isEditMode ? 'Zapisz zmiany' : 'Dodaj worker' }}
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }

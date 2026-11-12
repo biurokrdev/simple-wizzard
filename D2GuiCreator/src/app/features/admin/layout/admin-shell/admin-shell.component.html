@@ -1,0 +1,28 @@
+<div class="admin-layout">
+  <main class="admin-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <aside class="admin-sidebar">
+    <a class="sidebar-brand" routerLink="dashboard" title="Przegląd administracyjny">
+      <img src="logo.svg" alt="" class="sidebar-logo" />
+      <span class="sidebar-title">Administracja</span>
+    </a>
+
+    <nav class="sidebar-nav" aria-label="Administracja">
+      <a class="nav-item" routerLink="projects" routerLinkActive="active">Projekty pism</a>
+      <a class="nav-item" routerLink="approvals" routerLinkActive="active">Zgłoszenia do publikacji</a>
+      <a class="nav-item" routerLink="tenants" routerLinkActive="active">Zespoły (tenanci)</a>
+      <a class="nav-item" routerLink="worker-profiles" routerLinkActive="active">Profile workerów</a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="nav-item back-link" routerLink="/projects">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Powrót do aplikacji
+      </a>
+    </div>
+  </aside>
+</div>

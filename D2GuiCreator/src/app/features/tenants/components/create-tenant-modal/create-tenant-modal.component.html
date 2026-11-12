@@ -1,0 +1,121 @@
+<div class="modal-overlay" [class.modal-overlay--visible]="isVisible()" (click)="onClose()">
+  <div class="modal" [class.modal--visible]="isVisible()" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal__header">
+      <h2 class="modal__title">Nowy zespół projektowy</h2>
+      <button 
+        type="button" 
+        class="modal__close"
+        (click)="onClose()"
+        [disabled]="isSaving()">
+        ✕
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="modal__content">
+      <form (ngSubmit)="onSubmit()">
+        <!-- Name -->
+        <div class="form-field">
+          <label class="form-field__label" for="tenantName">
+            Nazwa zespołu *
+          </label>
+          <input
+            id="tenantName"
+            type="text"
+            class="form-field__input"
+            [(ngModel)]="name"
+            name="name"
+            placeholder="np. Zespół Kredytów Hipotecznych"
+            required
+            [disabled]="isSaving()">
+        </div>
+
+        <!-- Description -->
+        <div class="form-field">
+          <label class="form-field__label" for="tenantDescription">
+            Opis (opcjonalnie)
+          </label>
+          <textarea
+            id="tenantDescription"
+            class="form-field__textarea"
+            [(ngModel)]="description"
+            name="description"
+            placeholder="Krótki opis zespołu..."
+            rows="3"
+            [disabled]="isSaving()"></textarea>
+        </div>
+
+        <!-- Members -->
+        <div class="form-field">
+          <label class="form-field__label">
+            Członkowie zespołu
+          </label>
+          
+          <!-- Current user (creator) -->
+          <div class="members-list">
+            <div class="member-item member-item--creator">
+              <span class="member-item__key">{{ corporateKey }}</span>
+              <span class="member-item__badge">Ty (właściciel)</span>
+            </div>
+
+            <!-- Added members -->
+            @for (member of members(); track member) {
+              <div class="member-item">
+                <span class="member-item__key">{{ member }}</span>
+                <button
+                  type="button"
+                  class="member-item__remove"
+                  (click)="removeMember(member)"
+                  [disabled]="isSaving()"
+                  title="Usuń">
+                  ✕
+                </button>
+              </div>
+            }
+          </div>
+
+          <!-- Add member input -->
+          <div class="add-member">
+            <input
+              type="text"
+              class="add-member__input"
+              [(ngModel)]="newMemberKey"
+              name="newMember"
+              placeholder="Wpisz Corporate Key członka..."
+              (keyup.enter)="addMember()"
+              [disabled]="isSaving()">
+            <app-button
+              [variant]="'secondary'"
+              [size]="'small'"
+              [disabled]="isSaving() || !newMemberKey.trim()"
+              (clicked)="addMember()">
+              Dodaj
+            </app-button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="modal__footer">
+      <app-button
+        [variant]="'secondary'"
+        [disabled]="isSaving()"
+        (clicked)="onClose()">
+        Anuluj
+      </app-button>
+      <app-button
+        [variant]="'primary'"
+        [disabled]="isSaving() || !name.trim()"
+        (clicked)="onSubmit()">
+        @if (isSaving()) {
+          <span class="btn__spinner"></span>
+          Tworzenie...
+        } @else {
+          Utwórz zespół
+        }
+      </app-button>
+    </div>
+  </div>
+</div>

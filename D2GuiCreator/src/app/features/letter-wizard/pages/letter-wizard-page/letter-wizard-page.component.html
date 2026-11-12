@@ -1,0 +1,192 @@
+<section class="document-wizard" [class.document-wizard--readonly]="readOnly()">
+  <app-wizard-step-header
+    [title]="stepTitle()"
+    [description]="stepDescription()"
+    [stepIndex]="currentStepIndex() + 1"
+    [stepCount]="stepOrder.length"
+    (close)="onCancel()">
+  </app-wizard-step-header>
+
+  <app-wizard-stepper
+    [steps]="stepperItems()"
+    (stepClicked)="onStepperClick($event)">
+  </app-wizard-stepper>
+
+  <!-- Podgląd / przegląd: wyjaśnienie, że wersję ogląda się krok po kroku (nie „zniknęły dane”) -->
+  @if (readOnly()) {
+    <div class="wizard-banner" [class.wizard-banner--review]="reviewMode()" role="status">
+      <span class="wizard-banner__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"></circle><line x1="12" y1="10.5" x2="12" y2="16.5"></line><circle cx="12" cy="7.5" r=".6" fill="currentColor"></circle>
+        </svg>
+      </span>
+      <div class="wizard-banner__body">
+        @if (reviewMode()) {
+          <strong>Przegląd przed publikacją — krok {{ currentStepIndex() + 1 }} z {{ stepOrder.length }}: {{ stepLabel() }}.</strong>
+          Oceniasz wersję krok po kroku: przechodź „Dalej” albo klikaj kroki na pasku. Przy każdym kroku możesz zostawić uwagę dla projektanta;
+          decyzję (zaakceptuj / odeślij do poprawy) podejmiesz na ostatnim kroku.
+        } @else {
+          <strong>Podgląd tylko do odczytu — krok {{ currentStepIndex() + 1 }} z {{ stepOrder.length }}: {{ stepLabel() }}.</strong>
+          Wersję oglądasz krok po kroku: dane pozostałych kroków są pod „Dalej” albo pod kliknięciem kroku na pasku.
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Recenzent: uwaga do bieżącego kroku (zapis automatyczny) -->
+  @if (reviewMode()) {
+    <div class="review-note">
+      <div class="review-note__header">
+        <label class="review-note__label" for="reviewNote">Uwaga recenzenta do kroku „{{ stepLabel() }}”</label>
+        <span class="review-note__state" [class.review-note__state--error]="notesSaveState() === 'error'">
+          @switch (notesSaveState()) {
+            @case ('saving') { zapisywanie… }
+            @case ('dirty') { zmieniono }
+            @case ('saved') { zapisano }
+            @case ('error') { błąd zapisu }
+            @default { @if (notesCount() > 0) { uwag: {{ notesCount() }} } }
+          }
+        </span>
+      </div>
+      <textarea id="reviewNote" class="review-note__input" rows="2"
+                placeholder="np. Brak tagu zgody RODO w sekcji 3 — uzupełnij przed publikacją"
+                [ngModel]="currentNote()" (ngModelChange)="onNoteChange($event)" [ngModelOptions]="{ standalone: true }"></textarea>
+    </div>
+  }
+
+  <!-- Projektant: uwagi recenzenta do tej wersji (po odesłaniu do poprawy) -->
+  @if (showReviewerFeedback()) {
+    @let note = currentNote();
+    @if (note || (currentStepIndex() === 0 && reviewerComment())) {
+      <div class="reviewer-feedback" role="note">
+        <span class="reviewer-feedback__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </span>
+        <div class="reviewer-feedback__body">
+          <strong>Uwagi recenzenta{{ reviewerName() ? ' (' + reviewerName() + ')' : '' }}</strong>
+          @if (currentStepIndex() === 0 && reviewerComment()) {
+            <p class="reviewer-feedback__text">{{ reviewerComment() }}</p>
+          }
+          @if (note) {
+            <p class="reviewer-feedback__text"><span class="reviewer-feedback__step">{{ stepLabel() }}:</span> {{ note }}</p>
+          }
+          @if (orderedNotes().length > 1 && currentStepIndex() === 0) {
+            <p class="reviewer-feedback__hint">Uwagi do pozostałych kroków zobaczysz po przejściu do nich.</p>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  <div class="document-wizard__body" [class.document-wizard__body--loading]="stepLoading()" [attr.aria-busy]="stepLoading()">
+    @if (stepLoading()) {
+      <div class="step-loader" role="status" aria-live="polite">
+        <span class="step-loader__spinner" aria-hidden="true"></span>
+        <span class="step-loader__text">Wczytywanie kroku…</span>
+      </div>
+    }
+    <form [formGroup]="form" class="document-wizard__step">
+      @switch (currentStepKey()) {
+        @case ('documentDescription') {
+          <app-document-description-step
+            [generalGroup]="generalGroup"
+            [businessGroup]="businessGroup"
+            (ready)="onStepReady()">
+          </app-document-description-step>
+        }
+        @case ('templateAndSchema') {
+          <app-template-and-schema-step
+            [group]="templateAndSchemaGroup"
+            [readOnly]="readOnly()"
+            [generalGroup]="generalGroup"
+            [initialDataSchema]="$safeNavigationMigration(templateAndSchemaGroup.get('dataSchemaId')?.value)"
+            (ready)="onStepReady()"
+            (placeholdersExtracted)="onPlaceholdersExtracted($event)">
+          </app-template-and-schema-step>
+        }
+        @case ('configuration') {
+          <app-configuration-step
+            [group]="configurationGroup"
+            [readOnly]="readOnly()"
+            (ready)="onStepReady()">
+          </app-configuration-step>
+        }
+        @case ('summary') {
+          <app-summary-step
+            [data]="form.getRawValue()"
+            [recipients]="recipients()"
+            [businessLines]="businessLines()"
+            [statuses]="statuses()"
+            [submissionIssues]="submissionIssues()"
+            [readOnly]="readOnly()"
+            (ready)="onStepReady()"
+            (goToStep)="onGoToStep($event)">
+          </app-summary-step>
+        }
+      }
+    </form>
+  </div>
+
+  <app-wizard-footer
+    [canGoBack]="currentStepIndex() > 0"
+    [canGoNext]="true"
+    [isLastStep]="currentStepIndex() === stepOrder.length - 1"
+    [isSaving]="isSaving()"
+    [readOnly]="readOnly()"
+    [reviewMode]="reviewMode()"
+    [isSubmitting]="isDeciding()"
+    [lastSaved]="lastSaved()"
+    (back)="onBack()"
+    (next)="onNext()"
+    (save)="onSave()"
+    (approve)="openDecision('approve')"
+    (reject)="openDecision('reject')"
+    (cancel)="onCancel()">
+  </app-wizard-footer>
+</section>
+
+<!-- Decyzja recenzenta (tryb przeglądu) -->
+@if (decision(); as kind) {
+  <div class="admin-dialog__backdrop" (click)="closeDecision()"></div>
+  <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="wizardDecisionTitle">
+    <header class="admin-dialog__header">
+      <h2 id="wizardDecisionTitle" class="admin-dialog__title">
+        {{ kind === 'approve' ? 'Zaakceptuj wersję' : 'Odeślij do poprawy' }} {{ versionTag() }}
+      </h2>
+      <button type="button" class="admin-dialog__close" (click)="closeDecision()" aria-label="Zamknij">✕</button>
+    </header>
+    <div class="admin-dialog__body">
+      @if (orderedNotes().length > 0) {
+        <div class="decision-notes">
+          <span class="d2-field__label">Uwagi do kroków ({{ orderedNotes().length }}) — projektant zobaczy je przy krokach</span>
+          <ul class="decision-notes__list">
+            @for (n of orderedNotes(); track n.step) {
+              <li><span class="decision-notes__step">{{ n.label }}</span> {{ n.text }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <div class="d2-field">
+        <label class="d2-field__label" for="wizardDecisionComment">
+          {{ kind === 'approve' ? 'Komentarz (opcjonalnie)' : (orderedNotes().length > 0 ? 'Komentarz ogólny (opcjonalnie)' : 'Co wymaga poprawy') }}
+        </label>
+        <textarea id="wizardDecisionComment" class="d2-field__control" rows="4" [(ngModel)]="decisionComment" [ngModelOptions]="{ standalone: true }"
+                  [placeholder]="kind === 'approve' ? 'np. Zgodne z wytycznymi' : 'np. Popraw mapowanie kwoty i uzupełnij tag zgody'"></textarea>
+        @if (kind === 'reject' && !canConfirmDecision()) {
+          <span class="d2-field__hint">Podaj komentarz albo zostaw uwagę przy którymś kroku — projektant musi wiedzieć, co poprawić.</span>
+        }
+      </div>
+      @if (decisionError()) {
+        <p class="admin-message admin-message--error">{{ decisionError() }}</p>
+      }
+      <footer class="admin-dialog__footer">
+        <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="closeDecision()">Anuluj</app-button>
+        <app-button [variant]="kind === 'approve' ? 'primary' : 'accent'" [disabled]="isDeciding() || !canConfirmDecision()" (clicked)="confirmDecision()">
+          {{ isDeciding() ? 'Zapisywanie…' : kind === 'approve' ? 'Zaakceptuj' : 'Odeślij do poprawy' }}
+        </app-button>
+      </footer>
+    </div>
+  </div>
+}

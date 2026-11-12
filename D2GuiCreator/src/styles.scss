@@ -1,0 +1,45 @@
+/* You can add global styles to this file, and also import other style files */
+// Motyw D2 (D2GuiShared): zmienne CSS kolorów i rozmiarów + klasy .d2-page / .d2-panel / .d2-field
+@use 'd2-gui-shared/styles/theme';
+@use 'styles/tokens';
+@use 'styles/mixins';
+@use 'styles/typography';
+@use 'styles/layout';
+@use 'styles/utilities';
+@use 'styles/buttons';
+@use 'styles/grid';
+@use 'styles/admin-shared'; // wspólne klasy stron administracyjnych i odznak statusu wersji
+
+/* Custom scrollbar - szerszy pomarańczowy (Orange - dominujący) */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: tokens.$color-primary #f0f0f0;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: #f0f0f0 !important;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: tokens.$color-primary !important;
+  border-radius: 8px !important;
+  border: 3px solid #f0f0f0 !important;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: tokens.$color-primary-hover !important;
+}

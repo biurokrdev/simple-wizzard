@@ -1,0 +1,20 @@
+<section class="page-layout">
+  @if (title) {
+    <header class="page-layout__header">
+      <h1 class="page-layout__title">{{ title }}</h1>
+      @if (subtitle) {
+        <p class="page-layout__subtitle">
+          {{ subtitle }}
+        </p>
+      }
+    </header>
+  }
+
+  <div class="page-layout__actions">
+    <ng-content select="[actions]"></ng-content>
+  </div>
+
+  <div class="page-layout__content">
+    <ng-content select="[content]"></ng-content>
+  </div>
+</section>

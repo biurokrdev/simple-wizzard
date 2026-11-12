@@ -1,0 +1,86 @@
+@let v = view();
+
+<div class="mapping" [class.mapping--compact]="compact()" [class.mapping--unknown]="v.kind === 'unknown'">
+  @switch (v.kind) {
+    @case ('substitution') {
+      <span class="mapping__source mapping__source--placeholder" [title]="'Znacznik w szablonie'">
+        {{ v.source ?? '<%…%>' }}
+      </span>
+      <span class="mapping__arrow" aria-label="mapowane na">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </span>
+      <ng-container *ngTemplateOutlet="target"></ng-container>
+      @if (v.defaultValue) {
+        <span class="mapping__meta" [title]="'Wartość domyślna, gdy brak danych'">domyślnie: <strong>{{ v.defaultValue }}</strong></span>
+      }
+      @if (v.cellRef) {
+        <span class="mapping__meta" [title]="'Komórka w arkuszu' + (v.label ? ' — etykieta obok: ' + v.label : '')">{{ v.label ? v.label + ' · ' : '' }}<strong>{{ v.cellRef }}</strong></span>
+      }
+    }
+    @case ('visibility') {
+      <span class="mapping__source mapping__source--control" [title]="'Kontrolka tekstowa w szablonie'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <line x1="7" y1="10" x2="17" y2="10"></line>
+          <line x1="7" y1="14" x2="13" y2="14"></line>
+        </svg>
+        {{ v.source ?? '…' }}
+      </span>
+      <span class="mapping__relation">widoczna gdy</span>
+      <ng-container *ngTemplateOutlet="target"></ng-container>
+      @if (v.hideIfFalse) {
+        <span class="mapping__meta">ukryj przy fałszu</span>
+      }
+    }
+    @case ('repeat') {
+      <span class="mapping__source mapping__source--control" [title]="'Formant powielany w szablonie'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="5" rx="1"></rect>
+          <rect x="3" y="11" width="18" height="5" rx="1"></rect>
+          <line x1="3" y1="20" x2="21" y2="20" stroke-dasharray="3 2"></line>
+        </svg>
+        {{ v.source ?? '…' }}
+      </span>
+      <span class="mapping__relation">dla każdego z</span>
+      <ng-container *ngTemplateOutlet="target"></ng-container>
+      @if (scopeLabel()) {
+        <span class="mapping__meta" [title]="'Zakres powielania'">{{ scopeLabel() }}</span>
+      }
+      @if (v.repeatColumns) {
+        <span class="mapping__meta" [title]="'Kolumny arkusza mapowane na właściwości elementu listy'">{{ v.cellRef ? v.cellRef + ' · ' : '' }}<strong>{{ v.repeatColumns }}</strong> {{ v.repeatColumns === 1 ? 'kolumna' : v.repeatColumns < 5 ? 'kolumny' : 'kolumn' }}</span>
+      }
+    }
+    @default {
+      <span class="mapping__raw" [title]="v.parsed ? 'Nieznany typ workera — podgląd surowej konfiguracji' : 'Konfiguracja nie jest poprawnym JSON-em'">
+        @if (!v.parsed) {
+          <svg class="mapping__warn" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        }
+        {{ rawPreview() || '— brak konfiguracji —' }}
+      </span>
+    }
+  }
+</div>
+
+<ng-template #target>
+  @if (v.targetIsPath) {
+    <span class="mapping__path" [title]="v.targetExpression ?? ''">
+      @for (segment of v.targetPath; track $index) {
+        @if ($index > 0) {
+          <span class="mapping__path-sep" aria-hidden="true">›</span>
+        }
+        <span class="mapping__segment" [class.mapping__segment--root]="$index === 0">{{ segment }}</span>
+      }
+    </span>
+  } @else if (v.targetExpression) {
+    <code class="mapping__expression" [title]="v.targetExpression">{{ v.targetExpression }}</code>
+  } @else {
+    <span class="mapping__missing">brak wyrażenia</span>
+  }
+</ng-template>

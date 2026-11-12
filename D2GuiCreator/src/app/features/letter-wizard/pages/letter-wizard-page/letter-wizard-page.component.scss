@@ -1,0 +1,221 @@
+@use 'tokens';
+@use 'mixins';
+
+/* Odstępy nagłówka kreatora zmniejszone 2026-11-08: <main> shella ma już 1.5rem paddingu,
+   więc tu tylko boczne marginesy; tytuł i stepper siedzą ciasno (sam pasek postępu bez zmian). */
+.document-wizard {
+  @include mixins.panel;
+  border: none; // panel kreatora bez ramki (decyzja właściciela 2026-11-08)
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Baner trybu podglądu / przeglądu: tłumaczy, że wersję ogląda się krok po kroku
+.wizard-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: tokens.$color-bg-subtle;
+  color: tokens.$color-text-main;
+  font-size: 14px;
+  line-height: 1.45;
+
+  &--review {
+    background: var(--d2-color-warning-light);
+  }
+
+  &__icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: 1px;
+    color: tokens.$color-primary;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  strong {
+    color: tokens.$color-header;
+  }
+}
+
+// Pole uwag recenzenta do bieżącego kroku (tryb przeglądu)
+.review-note {
+  margin: 0 0 16px;
+  padding: 12px 16px 14px;
+  border: 1px dashed var(--d2-color-warning);
+  border-radius: 10px;
+  background: tokens.$color-surface;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  &__label {
+    @include mixins.field-label;
+  }
+
+  &__state {
+    font-size: 12px;
+    color: tokens.$color-text-muted;
+
+    &--error {
+      color: var(--d2-color-danger);
+    }
+  }
+
+  &__input {
+    @include mixins.control;
+    height: auto;
+    min-height: 64px;
+    padding: 10px tokens.$control-padding-x;
+    resize: vertical;
+  }
+}
+
+// Uwagi recenzenta widoczne dla projektanta (po odesłaniu do poprawy)
+.reviewer-feedback {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-left: 4px solid var(--d2-color-danger);
+  border-radius: 8px;
+  background: var(--d2-color-danger-light);
+  font-size: 14px;
+  line-height: 1.45;
+
+  &__icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    color: var(--d2-color-danger);
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__body strong {
+    color: tokens.$color-header;
+  }
+
+  &__text {
+    margin: 4px 0 0;
+    color: tokens.$color-text-main;
+  }
+
+  &__step {
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: tokens.$color-text-muted;
+  }
+}
+
+.decision-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__list {
+    margin: 0;
+    padding: 0 0 0 2px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  &__step {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    background: tokens.$color-bg-subtle;
+    color: tokens.$color-text-muted;
+  }
+}
+
+.document-wizard__body {
+  position: relative;
+  min-height: 240px;
+  margin-top: 0.5rem;
+}
+
+// Nowy krok wjeżdża łagodnie (komponent kroku jest tworzony od nowa przy każdej zmianie)
+.document-wizard__step > * {
+  display: block;
+  animation: wizard-step-in 0.25s ease-out;
+}
+
+.document-wizard__body--loading .document-wizard__step {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.step-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 72px;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: tokens.$color-text-muted;
+  pointer-events: none;
+}
+
+.step-loader__spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid tokens.$color-primary-light;
+  border-top-color: tokens.$color-primary;
+  border-radius: 50%;
+  animation: wizard-spin 0.8s linear infinite;
+}
+
+@keyframes wizard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wizard-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .document-wizard__step > * {
+    animation: none;
+  }
+}

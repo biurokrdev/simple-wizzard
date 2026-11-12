@@ -1,0 +1,214 @@
+<app-page-layout
+  title="Zespoły (tenanci)"
+  subtitle="Wszystkie zespoły projektowe. Rozwiń wiersz, aby zarządzać użytkownikami: blokada, dostęp tylko do odczytu, usunięcie, dodanie.">
+
+  <div actions class="tenants-actions">
+    <div class="tenants-actions__left">
+      <app-button [variant]="'primary'" [size]="'small'" (clicked)="openCreate()">+ Dodaj zespół</app-button>
+    </div>
+    <div class="tenants-actions__summary">
+      <span>Zespołów: <strong>{{ tenants().length }}</strong></span>
+      @if (blockedCount() > 0) {
+        <span class="status-pill status-pill--blocked">zablokowane: {{ blockedCount() }}</span>
+      }
+    </div>
+  </div>
+
+  <div content>
+    @if (error()) {
+      <p class="admin-message admin-message--error">{{ error() }}</p>
+    }
+
+    <d2-grid
+      [columns]="columns"
+      [rows]="tenants()"
+      [trackBy]="trackTenant"
+      [loading]="isLoading()"
+      [pageSize]="25"
+      [labels]="gridLabels"
+      [initialSort]="{ key: 'name', direction: 'asc' }"
+      caption="Zespoły projektowe">
+
+      <ng-template d2GridCell="isActive" let-tenant>
+        <span class="status-pill" [class.status-pill--active]="tenant.isActive" [class.status-pill--blocked]="!tenant.isActive">
+          {{ tenant.isActive ? 'aktywny' : 'zablokowany' }}
+        </span>
+      </ng-template>
+
+      <ng-template d2GridCell="name" let-tenant>
+        <span class="tenant-name">{{ tenant.name }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="description" let-tenant>
+        <span class="admin-muted">{{ tenant.description || '—' }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="createdAt" let-tenant>
+        {{ tenant.createdAt | date: 'dd.MM.yyyy HH:mm' }}
+      </ng-template>
+
+      <ng-template d2GridCell="actions" let-tenant>
+        <div class="d2-row-actions">
+          <button type="button" class="d2-row-button" [class.d2-row-button--danger]="tenant.isActive"
+                  [disabled]="busyId() === tenant.id" (click)="toggleTenantActive(tenant)">
+            {{ tenant.isActive ? 'Zablokuj' : 'Odblokuj' }}
+          </button>
+        </div>
+      </ng-template>
+
+      <ng-template d2GridDetail let-tenant>
+        <div class="members" [class.members--busy]="busyId() === tenant.id">
+          <div class="detail-tabs" role="tablist" [attr.aria-label]="'Szczegóły zespołu ' + tenant.name">
+            <button type="button" role="tab" class="detail-tabs__tab" [class.detail-tabs__tab--active]="tabOf(tenant.id) === 'members'"
+                    [attr.aria-selected]="tabOf(tenant.id) === 'members'" (click)="selectTab(tenant, 'members')">
+              Użytkownicy <span class="detail-tabs__count">{{ tenant.memberCount }}</span>
+            </button>
+            <button type="button" role="tab" class="detail-tabs__tab" [class.detail-tabs__tab--active]="tabOf(tenant.id) === 'projects'"
+                    [attr.aria-selected]="tabOf(tenant.id) === 'projects'" (click)="selectTab(tenant, 'projects')">
+              Projekty pism
+              @if (tenantProjects()[tenant.id]; as projects) {
+                <span class="detail-tabs__count">{{ projects.length }}</span>
+              }
+            </button>
+          </div>
+
+          @if (tabOf(tenant.id) === 'projects') {
+            @if (projectsLoading()[tenant.id]) {
+              <p class="admin-muted members__empty">Wczytywanie projektów…</p>
+            } @else if ((tenantProjects()[tenant.id] ?? []).length === 0) {
+              <app-empty-state icon="folder" size="section" title="Zespół nie ma jeszcze projektów pism"
+                               message="Projekty przypisane do tego zespołu pojawią się tutaj, gdy projektant wybierze go w kroku „Opis dokumentu”." />
+            } @else {
+              <table class="members__table">
+                <thead>
+                  <tr>
+                    <th>Nazwa dokumentu</th>
+                    <th>Source</th>
+                    <th>Szablon</th>
+                    <th>Stan</th>
+                    <th>Utworzono</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (project of tenantProjects()[tenant.id]; track project.id) {
+                    <tr>
+                      <td><strong>{{ project.name }}</strong></td>
+                      <td class="d2-mono">{{ project.source }}</td>
+                      <td>
+                        @if (project.templateName) {
+                          {{ project.templateName }}
+                          @if (project.templateVersionTag) {
+                            <span class="admin-muted"> ({{ project.templateVersionIsActive ? 'aktywna' : 'robocza' }} {{ project.templateVersionTag }})</span>
+                          }
+                        } @else {
+                          <span class="admin-muted">brak szablonu</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="status-pill" [class.status-pill--active]="!!project.currentActiveVersionId">{{ project.currentActiveVersionId ? 'aktywny' : 'roboczy' }}</span>
+                      </td>
+                      <td>{{ project.createdAt | date: 'dd.MM.yyyy HH:mm' }}</td>
+                      <td class="members__remove">
+                        <button type="button" class="d2-row-button" (click)="openProject(project)">Wyświetl</button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          } @else {
+          <div class="members__header">
+            <strong>Użytkownicy zespołu „{{ tenant.name }}”</strong>
+            <span class="admin-muted">{{ tenant.memberCount }} {{ tenant.memberCount === 1 ? 'osoba' : 'osób' }}</span>
+          </div>
+
+          @if (tenant.members.length === 0) {
+            <p class="admin-muted members__empty">Zespół nie ma jeszcze użytkowników.</p>
+          } @else {
+            <table class="members__table">
+              <thead>
+                <tr>
+                  <th>Login (corporate key)</th>
+                  <th>Dodano</th>
+                  <th>Dostęp</th>
+                  <th>Zablokowany</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (member of tenant.members; track member.id) {
+                  <tr [class.members__row--blocked]="member.isBlocked">
+                    <td class="d2-mono">{{ member.corporateKey }}</td>
+                    <td>{{ member.addedAt | date: 'dd.MM.yyyy' }}</td>
+                    <td>
+                      <label class="row-toggle" title="Tylko odczyt: może przeglądać projekty zespołu, nie może ich tworzyć ani edytować">
+                        <input type="checkbox" [checked]="member.access === 'ReadOnly'" (change)="toggleReadOnly(tenant, member)" />
+                        <span class="row-toggle__track"><span class="row-toggle__thumb"></span></span>
+                        <span>{{ accessLabel(member) }}</span>
+                      </label>
+                    </td>
+                    <td>
+                      <label class="row-toggle row-toggle--danger" title="Zablokowany: nie widzi projektów zespołu">
+                        <input type="checkbox" [checked]="member.isBlocked" (change)="toggleBlocked(tenant, member)" />
+                        <span class="row-toggle__track"><span class="row-toggle__thumb"></span></span>
+                        <span>{{ member.isBlocked ? 'tak' : 'nie' }}</span>
+                      </label>
+                    </td>
+                    <td class="members__remove">
+                      <button type="button" class="d2-row-icon d2-row-icon--danger" (click)="removeMember(tenant, member)" title="Usuń z zespołu" [attr.aria-label]="'Usuń ' + member.corporateKey + ' z zespołu'">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                          <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          <form class="members__add" (ngSubmit)="addMember(tenant)">
+            <input class="d2-field__control members__add-input" placeholder="Login użytkownika (corporate key)"
+                   [ngModel]="newMemberKey()[tenant.id] ?? ''" (ngModelChange)="setNewMemberKey(tenant.id, $event)" name="newMember-{{ tenant.id }}" />
+            <app-button [variant]="'secondary'" [style]="'outline'" [size]="'small'" [disabled]="!(newMemberKey()[tenant.id] ?? '').trim()" (clicked)="addMember(tenant)">
+              Dodaj użytkownika
+            </app-button>
+          </form>
+          }
+        </div>
+      </ng-template>
+    </d2-grid>
+  </div>
+</app-page-layout>
+
+@if (isCreateOpen()) {
+  <div class="admin-dialog__backdrop" (click)="closeCreate()"></div>
+  <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="createTenantTitle">
+    <header class="admin-dialog__header">
+      <h2 id="createTenantTitle" class="admin-dialog__title">Nowy zespół</h2>
+      <button type="button" class="admin-dialog__close" (click)="closeCreate()" aria-label="Zamknij">✕</button>
+    </header>
+    <form class="admin-dialog__body" (ngSubmit)="create()">
+      <div class="d2-field">
+        <label class="d2-field__label" for="tenantName">Nazwa zespołu</label>
+        <input id="tenantName" class="d2-field__control" [(ngModel)]="newName" name="newName" placeholder="np. Kredyty hipoteczne" required />
+      </div>
+      <div class="d2-field">
+        <label class="d2-field__label" for="tenantDescription">Opis (opcjonalnie)</label>
+        <input id="tenantDescription" class="d2-field__control" [(ngModel)]="newDescription" name="newDescription" />
+      </div>
+      <div class="d2-field">
+        <label class="d2-field__label" for="tenantMembers">Użytkownicy</label>
+        <textarea id="tenantMembers" class="d2-field__control d2-mono" rows="5" [(ngModel)]="newMembers" name="newMembers"
+                  placeholder="Loginy (corporate key), po jednym w linii albo po przecinku"></textarea>
+        <span class="d2-field__hint">Dodanych zostanie: {{ parsedNewMembers().length }}. Wszyscy z dostępem „edycja” — zmienisz to w szczegółach zespołu.</span>
+      </div>
+      <footer class="admin-dialog__footer">
+        <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="closeCreate()">Anuluj</app-button>
+        <app-button [variant]="'primary'" [disabled]="isSaving() || !newName.trim()" (clicked)="create()">{{ isSaving() ? 'Zapisywanie…' : 'Utwórz zespół' }}</app-button>
+      </footer>
+    </form>
+  </div>
+}

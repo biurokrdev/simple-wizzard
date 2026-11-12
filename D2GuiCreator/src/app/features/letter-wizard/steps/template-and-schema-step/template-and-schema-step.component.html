@@ -1,0 +1,240 @@
+<section class="wizard-step" [formGroup]="group">
+  <!-- SZABLON DOKUMENTU -->
+  <div class="step-section">
+    <div class="step-section__header">
+      <div>
+        <h2 class="step-section__title">Szablon dokumentu</h2>
+        <p class="step-section__subtitle">Wczytaj plik z szablonem dokumentu.</p>
+      </div>
+      <button type="button" class="d2-link-action" (click)="onInstructionClick()">
+        <span class="d2-link-action__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.1 15.5a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6zm1.9-6.1c-.8.5-1 .9-1 1.6v.5h-2v-.7c0-1.4.6-2.2 1.7-2.9.8-.5 1.1-.9 1.1-1.5 0-.7-.6-1.2-1.6-1.2-.9 0-1.6.4-2.2 1.1L8.6 7c.9-1.1 2.1-1.7 3.7-1.7 2.2 0 3.7 1.2 3.7 3 0 1.3-.6 2.2-2 3.1z"/>
+          </svg>
+        </span>
+        Instrukcja
+      </button>
+    </div>
+
+    <div
+      class="dropzone"
+      [class.dropzone--has-file]="templateIdControl?.value"
+      [class.dropzone--dragging]="isDragging()"
+      [class.dropzone--readonly]="readOnly"
+      (dragover)="readOnly || onDragOver($event)"
+      (dragleave)="readOnly || onDragLeave($event)"
+      (drop)="readOnly || onDrop($event)">
+
+      <!-- Widok gdy plik jest wybrany -->
+      @if (templateIdControl?.value) {
+        <div class="file-preview">
+          <div class="file-preview__icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <line x1="10" y1="9" x2="8" y2="9"></line>
+            </svg>
+          </div>
+          <div class="file-preview__info">
+            <p class="file-preview__name">{{ templateIdControl?.value }}</p>
+          </div>
+          @if (!readOnly) {
+          <button
+            type="button"
+            class="file-preview__remove"
+            (click)="removeFile()"
+            title="Usuń plik">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          }
+        </div>
+      } @else {
+        <div class="dropzone__content-wrapper">
+          <div class="dropzone__icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="dropzone__content">
+            <p class="dropzone__main-text">Przeciągnij i upuść tutaj</p>
+            <p class="dropzone__sub-text">Dopuszczalne formaty pliku: DOCX (dokument Word) lub XLSX (arkusz Excel)</p>
+          </div>
+          <div class="dropzone__actions">
+            @if (!readOnly) {
+              <button
+                type="button"
+                class="dropzone__button"
+                (click)="fileInput.click()">
+                Wybierz plik
+              </button>
+            }
+            <p class="dropzone__status dropzone__status--empty">{{ readOnly ? 'Brak pliku szablonu w tej wersji' : 'Nie wybrano pliku' }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Widok dropzone gdy brak pliku -->
+
+      <input
+        #fileInput
+        type="file"
+        class="dropzone__input"
+        accept=".docx,.xlsx"
+        [disabled]="readOnly"
+        (change)="onFileSelected($event)" />
+      </div>
+
+      <!-- Panel uwag do szablonu -->
+      <app-validation-notes
+        [notes]="validationNotes"
+        (noteRemoved)="onNoteRemoved($event)">
+      </app-validation-notes>
+
+      <!-- Znalezione elementy z rozpoznanym rodzajem formantu -->
+      @if (detectedRows().length > 0 && !isUploading()) {
+        <div class="detected-elements">
+          <div class="detected-elements__header">
+            <h3 class="detected-elements__title">Znalezione elementy w dokumencie ({{ detectedRows().length }})</h3>
+            <p class="detected-elements__hint">
+              Znaczniki <span class="d2-mono">&lt;%…%&gt;</span> podstawiają wartość. Formanty (content controls) rozpoznane jako:
+              <span class="d2-type-badge d2-type-badge--variant" [title]="kindHints['variant']">fragment wariantowy</span>
+              <span class="d2-type-badge d2-type-badge--repeat" [title]="kindHints['repeat']">fragment powtarzany</span>
+              <span class="d2-type-badge d2-type-badge--list" [title]="kindHints['list']">lista</span>
+              <span class="d2-type-badge d2-type-badge--table" [title]="kindHints['table']">tabela</span>
+            </p>
+          </div>
+          <d2-grid
+            [columns]="elementColumns"
+            [rows]="detectedRows()"
+            [trackBy]="trackRow"
+            [showColumnFilters]="false"
+            [pageSize]="10"
+            caption="Znalezione elementy w dokumencie">
+            <ng-template d2GridCell="name" let-row>
+              <span class="d2-mono element-name">{{ row.name }}</span>
+              @if (row.parent) {
+                <span class="element-parent" [title]="'Formant zagnieżdżony w „' + row.parent + '”'">w: {{ row.parent }}</span>
+              }
+            </ng-template>
+            <ng-template d2GridCell="label" let-row>
+              <span class="d2-type-badge" [class]="'d2-type-badge ' + badgeClass(row.kind)" [title]="row.kind !== 'placeholder' ? kindHints[row.kind] : 'Znacznik tekstowy <%…%>'">
+                {{ row.label }}
+              </span>
+              @if (row.level === 'inline') {
+                <span class="element-level" title="Formant w treści akapitu">w tekście</span>
+              } @else if (row.level === 'row' || row.level === 'cell') {
+                <span class="element-level" title="Formant wiersza / komórki tabeli">{{ row.level === 'row' ? 'wiersz' : 'komórka' }}</span>
+              }
+            </ng-template>
+            <ng-template d2GridCell="preview" let-row>
+              @if (row.columns?.length) {
+                <span class="element-columns" [title]="row.preview ?? ''">
+                  @for (col of row.columns; track col.cell) {
+                    <span class="element-column">
+                      <span class="d2-mono">{{ col.cell }}</span>
+                      @if (col.header) { <span class="element-column__header">{{ col.header }}</span> }
+                      <span class="element-column__prop">→ {{ col.property ? 'item.' + col.property : 'item' }}</span>
+                    </span>
+                  }
+                </span>
+              } @else if (row.preview) {
+                <span class="element-preview" [title]="row.preview">{{ row.preview }}</span>
+              } @else {
+                <span class="element-preview element-preview--empty">—</span>
+              }
+            </ng-template>
+            <ng-template d2GridCell="workerType" let-row>
+              <span class="element-worker">{{ row.workerType }}</span>
+            </ng-template>
+          </d2-grid>
+        </div>
+      }
+    </div>
+
+    <!-- SCHEMAT DANYCH -->
+    <div class="step-section">
+      <div class="step-section__header">
+        <div>
+          <h2 class="step-section__title">Schemat danych</h2>
+          <p class="step-section__subtitle">
+            Schemat na podstawie którego odbywa się mapowanie TAG-ów na wartości.
+          </p>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      @if (isUploading()) {
+        <div class="schema-loading">
+          <div class="schema-loading__spinner"></div>
+          <p class="schema-loading__text">Przetwarzanie pliku...</p>
+        </div>
+      }
+
+      <!-- Schema editor -->
+      @if (generatedSchema && !isUploading()) {
+        <div class="schema-editor">
+          <div class="schema-editor__toolbar">
+            <span class="schema-editor__label">
+              {{ isShowingApiRequest() ? 'Przykładowy API Request' : 'Schemat danych (JSON)' }}
+            </span>
+            <div class="schema-editor__actions">
+              <button
+                type="button"
+                class="d2-link-action d2-link-action--small"
+                (click)="viewApiRequest()"
+                [title]="isShowingApiRequest() ? 'Pokaż schemat danych' : 'Podgląd przykładowego API Request'">
+                <span class="d2-link-action__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </span>
+                {{ isShowingApiRequest() ? 'Pokaż schemat' : 'Pokaż przykładowy request' }}
+              </button>
+              <button
+                type="button"
+                class="d2-link-action d2-link-action--small"
+                (click)="copySchemaToClipboard()"
+                title="Kopiuj JSON">
+                <span class="d2-link-action__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/>
+                  </svg>
+                </span>
+                Kopiuj
+              </button>
+            </div>
+          </div>
+          @if (!isShowingApiRequest()) {
+            <textarea
+              class="schema-editor__textarea"
+              formControlName="dataSchemaId"
+            spellcheck="false"></textarea>
+          }
+          @if (isShowingApiRequest()) {
+            <textarea
+              class="schema-editor__textarea"
+              [value]="apiRequestExample"
+              spellcheck="false"
+            readonly></textarea>
+          }
+        </div>
+      }
+
+      <!-- Placeholder when no schema -->
+      @if (!generatedSchema && !isUploading()) {
+        <div class="schema-placeholder">
+          <p class="schema-placeholder__text">
+            Zostanie automatycznie wygenerowany po przetworzeniu pliku szablonu dokumentu.
+          </p>
+        </div>
+      }
+    </div>
+  </section>

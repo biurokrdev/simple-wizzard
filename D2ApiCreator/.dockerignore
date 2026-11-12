@@ -1,0 +1,43 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# IDE
+.vscode/
+.vs/
+.idea/
+*.user
+*.suo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Test
+**/TestResults/
+
+# Logs
+**/logs/
+*.log
+
+# NuGet
+*.nupkg
+.nuget/
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+*.db-shm
+*.db-wal

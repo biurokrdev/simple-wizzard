@@ -1,0 +1,15 @@
+@use 'tokens';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: tokens.$color-text-main;
+  font-family: tokens.$font-sans;
+  font-size: tokens.$font-size-base;
+}

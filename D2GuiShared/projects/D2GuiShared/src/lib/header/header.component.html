@@ -1,0 +1,11 @@
+<header class="dashboard-header">
+  <div class="header-content">
+    <a [routerLink]="homeLink()" class="brand" [title]="homeLinkTitle()">
+      <img [src]="logoSrc()" [alt]="appName() + ' Logo'" class="logo" />
+      <span class="app-name">{{ appName() }}</span>
+    </a>
+  </div>
+  <div class="header-actions">
+    <ng-content />
+  </div>
+</header>

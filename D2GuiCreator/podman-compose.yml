@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  d2-gui-creator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: d2-gui-creator
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

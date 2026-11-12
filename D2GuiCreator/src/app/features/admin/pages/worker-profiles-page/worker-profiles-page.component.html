@@ -1,0 +1,172 @@
+<app-page-layout
+  title="Profile workerów"
+  subtitle="Typy workerów z aplikacji docelowej. Zdecyduj, które mają być do wyboru w kreatorze, uzupełnij opisy i domyślne konfiguracje.">
+
+  <div actions class="profiles-actions">
+    <div class="profiles-actions__left">
+      <app-button [variant]="'primary'" [size]="'small'" [disabled]="isSyncing()" (clicked)="sync()">
+        {{ isSyncing() ? 'Synchronizuję…' : 'Synchronizuj z aplikacją docelową' }}
+      </app-button>
+      <button type="button" class="d2-link-action" (click)="openCreate()">
+        <span class="d2-link-action__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+          </svg>
+        </span>
+        Dodaj profil ręcznie
+      </button>
+    </div>
+    <div class="profiles-actions__summary">
+      <span>Widoczne w kreatorze: <strong>{{ visibleCount() }}</strong> z {{ profiles().length }}</span>
+      @if (missingCount() > 0) {
+        <span class="profiles-actions__warning">Brak w katalogu: {{ missingCount() }}</span>
+      }
+    </div>
+  </div>
+
+  <div content>
+    @if (error()) {
+      <p class="profiles-message profiles-message--error">{{ error() }}</p>
+    }
+
+    @if (syncResult(); as result) {
+      <div class="profiles-message profiles-message--info">
+        <strong>Synchronizacja zakończona</strong> ({{ result.source }}, {{ result.syncedAt | date: 'dd.MM.yyyy HH:mm' }}):
+        nowe {{ result.added.length }}@if (result.added.length) { ({{ result.added.join(', ') }}) },
+        potwierdzone {{ result.confirmed.length }},
+        brak w katalogu {{ result.missing.length }}@if (result.missing.length) { ({{ result.missing.join(', ') }}) }.
+        Nowe typy są ukryte — włącz te, które mają być dostępne dla użytkowników.
+        <button type="button" class="profiles-message__close" (click)="syncResult.set(null)" aria-label="Zamknij komunikat">✕</button>
+      </div>
+    }
+
+    <d2-grid
+      [columns]="columns"
+      [rows]="profiles()"
+      [trackBy]="trackProfile"
+      [loading]="isLoading()"
+      [pageSize]="25"
+      [labels]="gridLabels"
+      [initialSort]="{ key: 'key', direction: 'asc' }"
+      caption="Profile workerów">
+
+      <ng-template d2GridCell="isVisible" let-profile>
+        <label class="visible-toggle" [class.visible-toggle--busy]="togglingId() === profile.id" [title]="profile.isVisible ? 'Widoczny w kreatorze — kliknij, aby ukryć' : 'Ukryty — kliknij, aby udostępnić w kreatorze'">
+          <input type="checkbox" [checked]="profile.isVisible" [disabled]="togglingId() === profile.id" (change)="toggleVisible(profile)" />
+          <span class="visible-toggle__track"><span class="visible-toggle__thumb"></span></span>
+        </label>
+      </ng-template>
+
+      <ng-template d2GridCell="key" let-profile>
+        <span class="d2-mono profile-key">{{ profile.key }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="description" let-profile>
+        <span class="profile-description" [title]="profile.description ?? ''">{{ profile.description || '—' }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="source" let-profile>
+        @if (profile.isMissingInSource) {
+          <span class="d2-type-badge profile-badge--missing" title="Ostatnia synchronizacja nie zwróciła tego typu">brak w katalogu</span>
+        } @else if (profile.source === 'Manual') {
+          <span class="d2-type-badge">ręczny</span>
+        } @else {
+          <span class="d2-type-badge d2-type-badge--placeholder">katalog</span>
+        }
+      </ng-template>
+
+      <ng-template d2GridCell="lastSyncedAt" let-profile>
+        {{ profile.lastSyncedAt ? (profile.lastSyncedAt | date: 'dd.MM.yyyy HH:mm') : '—' }}
+      </ng-template>
+
+      <ng-template d2GridCell="actions" let-profile>
+        <div class="d2-row-actions">
+          <button type="button" class="d2-row-button" (click)="openEdit(profile)">Edytuj</button>
+          @if (profile.source === 'Manual') {
+            <button type="button" class="d2-row-icon d2-row-icon--danger" (click)="remove(profile)" title="Usuń profil" [attr.aria-label]="'Usuń profil ' + profile.displayName">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+              </svg>
+            </button>
+          }
+        </div>
+      </ng-template>
+
+      <ng-template d2GridDetail let-profile>
+        <div class="d2-json-detail">
+          <div class="d2-json-detail__header">
+            <span>Domyślna konfiguracja — <strong>{{ profile.displayName }}</strong> (token <code>{{ '{' }}name{{ '}' }}</code> = nazwa elementu)</span>
+          </div>
+          <pre class="d2-json-detail__pre">{{ prettyJson(profile.defaultConfigJson) }}</pre>
+        </div>
+      </ng-template>
+    </d2-grid>
+  </div>
+</app-page-layout>
+
+@if (isDialogOpen()) {
+  <div class="profile-dialog__backdrop" (click)="closeDialog()"></div>
+  <div class="profile-dialog" role="dialog" aria-modal="true" aria-labelledby="profileDialogTitle">
+    <header class="profile-dialog__header">
+      <h2 id="profileDialogTitle" class="profile-dialog__title">{{ editing() ? 'Edytuj profil workera' : 'Nowy profil workera' }}</h2>
+      <button type="button" class="profile-dialog__close" (click)="closeDialog()" aria-label="Zamknij">✕</button>
+    </header>
+
+    <form class="profile-dialog__body" [formGroup]="form" (ngSubmit)="save()">
+      <div class="profile-dialog__grid">
+        <div class="d2-field">
+          <label class="d2-field__label" for="profileKey">Typ workera (klucz)</label>
+          <input id="profileKey" class="d2-field__control d2-mono" formControlName="key" placeholder="np. Usuń obszar"
+                 [class.d2-field__control--error]="form.controls.key.invalid && form.controls.key.touched" />
+          @if (editing()) {
+            <span class="d2-field__hint">Klucz jest niezmienny — to wartość zapisywana w konfiguracji pisma.</span>
+          } @else if (form.controls.key.invalid && form.controls.key.touched) {
+            <span class="d2-field__error">Podaj klucz (maks. 100 znaków)</span>
+          }
+        </div>
+        <div class="d2-field">
+          <label class="d2-field__label" for="profileName">Nazwa w kreatorze</label>
+          <input id="profileName" class="d2-field__control" formControlName="displayName"
+                 [class.d2-field__control--error]="form.controls.displayName.invalid && form.controls.displayName.touched" />
+          @if (form.controls.displayName.invalid && form.controls.displayName.touched) {
+            <span class="d2-field__error">Podaj nazwę (maks. 200 znaków)</span>
+          }
+        </div>
+      </div>
+
+      <div class="d2-field">
+        <label class="d2-field__label" for="profileDescription">Opis działania</label>
+        <textarea id="profileDescription" class="d2-field__control" formControlName="description" rows="2"
+                  placeholder="Co robi ten worker i kiedy go użyć — tekst widoczny w dialogu mapowania"></textarea>
+      </div>
+
+      <div class="d2-field">
+        <label class="d2-field__label" for="profileConfig">Domyślna konfiguracja (JSON)</label>
+        <textarea id="profileConfig" class="d2-field__control d2-mono profile-dialog__json" formControlName="defaultConfigJson" rows="8"
+                  spellcheck="false" (input)="onJsonInput()" [class.d2-field__control--error]="jsonError()"></textarea>
+        @if (jsonError()) {
+          <span class="d2-field__error">{{ jsonError() }}</span>
+        } @else {
+          <span class="d2-field__hint">Token <code>{{ '{' }}name{{ '}' }}</code> zostanie zastąpiony nazwą elementu, np. <code>"search_for": "&lt;%{{ '{' }}name{{ '}' }}%&gt;"</code>.</span>
+        }
+      </div>
+
+      <div class="profile-dialog__grid">
+        <label class="profile-dialog__check">
+          <input type="checkbox" formControlName="isVisible" />
+          <span>Widoczny dla użytkowników kreatora</span>
+        </label>
+        <div class="d2-field">
+          <label class="d2-field__label" for="profileSort">Kolejność na liście</label>
+          <input id="profileSort" class="d2-field__control" type="number" formControlName="sortOrder" min="0" step="10" />
+        </div>
+      </div>
+
+      <footer class="profile-dialog__footer">
+        <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="closeDialog()">Anuluj</app-button>
+        <app-button [variant]="'primary'" [disabled]="isSaving()" (clicked)="save()">{{ isSaving() ? 'Zapisywanie…' : 'Zapisz' }}</app-button>
+      </footer>
+    </form>
+  </div>
+}

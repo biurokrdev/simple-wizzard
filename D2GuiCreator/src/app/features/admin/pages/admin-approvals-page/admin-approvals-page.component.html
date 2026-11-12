@@ -1,0 +1,101 @@
+<app-page-layout
+  title="Zgłoszenia do publikacji"
+  subtitle="Wersje pism zgłoszone przez projektantów. „Przeglądaj” otwiera wersję w kreatorze krok po kroku — przy każdym kroku możesz zostawić uwagę, a na końcu zaakceptować albo odesłać do poprawy. Decyzję możesz też podjąć od razu z listy.">
+
+  <div actions class="approvals-actions">
+    <span class="approvals-summary">Oczekujących: <strong>{{ rows().length }}</strong></span>
+    <button type="button" class="d2-link-action d2-link-action--small" (click)="load()">
+      <span class="d2-link-action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </span>
+      Odśwież
+    </button>
+  </div>
+
+  <div content>
+    @if (error()) {
+      <p class="admin-message admin-message--error">{{ error() }}</p>
+    }
+    @if (notice()) {
+      <div class="admin-message admin-message--success">
+        {{ notice() }}
+        <button type="button" class="admin-message__close" (click)="notice.set(null)" aria-label="Zamknij">✕</button>
+      </div>
+    }
+
+    <d2-grid
+      [columns]="columns"
+      [rows]="rows()"
+      [trackBy]="trackRow"
+      [loading]="isLoading()"
+      [pageSize]="25"
+      [initialSort]="{ key: 'submittedAt', direction: 'asc' }"
+      caption="Wersje czekające na akceptację"
+      emptyMessage="Brak zgłoszeń — żadna wersja nie czeka na decyzję.">
+
+      <ng-template d2GridCell="projectName" let-row>
+        <button type="button" class="link-plain" (click)="openDetails(row)" title="Szczegóły projektu">{{ row.projectName }}</button>
+      </ng-template>
+
+      <ng-template d2GridCell="tenantName" let-row>
+        @if (row.tenantId) {
+          <span class="d2-type-badge">{{ row.tenantName }}</span>
+        } @else {
+          <span class="admin-muted">prywatny</span>
+        }
+      </ng-template>
+
+      <ng-template d2GridCell="versionTag" let-row>
+        <span class="status-pill status-pill--pending">{{ row.versionTag }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="submittedAt" let-row>
+        {{ row.submittedAt ? (row.submittedAt | date: 'dd.MM.yyyy HH:mm') : '—' }}
+      </ng-template>
+
+      <ng-template d2GridCell="actions" let-row>
+        <div class="d2-row-actions">
+          <button type="button" class="d2-row-button" (click)="preview(row)" title="Przejrzyj wersję krok po kroku w kreatorze, dodaj uwagi do kroków i podejmij decyzję">Przeglądaj</button>
+          <button type="button" class="d2-row-button d2-row-button--approve" (click)="openDecision(row, 'approve')">Zaakceptuj</button>
+          <button type="button" class="d2-row-button d2-row-button--reject" (click)="openDecision(row, 'reject')">Odrzuć</button>
+        </div>
+      </ng-template>
+    </d2-grid>
+  </div>
+</app-page-layout>
+
+@if (decision(); as d) {
+  <div class="admin-dialog__backdrop" (click)="closeDecision()"></div>
+  <div class="admin-dialog" role="dialog" aria-modal="true" aria-labelledby="decisionTitle">
+    <header class="admin-dialog__header">
+      <h2 id="decisionTitle" class="admin-dialog__title">
+        {{ d.kind === 'approve' ? 'Zaakceptuj wersję' : 'Odeślij do poprawy' }} {{ d.row.versionTag }}
+      </h2>
+      <button type="button" class="admin-dialog__close" (click)="closeDecision()" aria-label="Zamknij">✕</button>
+    </header>
+    <div class="admin-dialog__body">
+      <p class="decision-summary">
+        <strong>{{ d.row.projectName }}</strong> ({{ d.row.source }}){{ d.row.tenantId ? ' · ' + d.row.tenantName : '' }}
+        @if (d.row.templateName) { · szablon <span class="d2-mono">{{ d.row.templateName }}</span> }
+      </p>
+      <div class="d2-field">
+        <label class="d2-field__label" for="decisionComment">
+          {{ d.kind === 'approve' ? 'Komentarz (opcjonalnie)' : 'Co wymaga poprawy' }}
+        </label>
+        <textarea id="decisionComment" class="d2-field__control" rows="4" [(ngModel)]="comment"
+                  [placeholder]="d.kind === 'approve' ? 'np. Zgodne z wytycznymi' : 'np. Brak tagu zgody RODO w sekcji 3, popraw mapowanie kwoty'"></textarea>
+        @if (d.kind === 'reject' && !comment.trim()) {
+          <span class="d2-field__hint">Komentarz jest wymagany — projektant zobaczy go w szczegółach projektu.</span>
+        }
+      </div>
+      <footer class="admin-dialog__footer">
+        <app-button [variant]="'secondary'" [style]="'outline'" (clicked)="closeDecision()">Anuluj</app-button>
+        <app-button [variant]="d.kind === 'approve' ? 'primary' : 'accent'" [disabled]="isSaving() || (d.kind === 'reject' && !comment.trim())" (clicked)="confirmDecision()">
+          {{ isSaving() ? 'Zapisywanie…' : d.kind === 'approve' ? 'Zaakceptuj' : 'Odeślij do poprawy' }}
+        </app-button>
+      </footer>
+    </div>
+  </div>
+}

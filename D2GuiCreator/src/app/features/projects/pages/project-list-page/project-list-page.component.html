@@ -1,0 +1,231 @@
+<app-page-layout 
+  title="Projekty dokumentów">
+  
+  <div actions class="actions-container">
+    <div class="actions-left">
+      <app-button
+        [variant]="'primary'"
+        [size]="'small'"
+        [disabled]="isLoading()"
+        (clicked)="onCreateProject()">
+        Dodaj
+      </app-button>
+      @if (!showAdvancedFilters()) {
+        <app-button
+          [variant]="'secondary'"
+          [style]="'outline'"
+          [size]="'small'"
+          [disabled]="isLoading()"
+          (clicked)="toggleAdvancedFilters()">
+          <span>Filtry zaawansowane</span>
+          @if (hasActiveFilters()) {
+            <span class="filter-badge">{{ getActiveFiltersCount() }}</span>
+          }
+        </app-button>
+      }
+      @if (hasActiveFilters()) {
+        <app-button
+          [variant]="'secondary'"
+          [style]="'text'"
+          [size]="'small'"
+          (clicked)="clearAllFilters()"
+          title="Wyczyść wszystkie filtry">
+          ✕ Wyczyść filtry ({{ getActiveFiltersCount() }})
+        </app-button>
+      }
+    </div>
+  </div>
+
+  <div content>
+    @if (showAdvancedFilters()) {
+      <div class="advanced-filters-panel">
+        <div class="filters-header">
+          <h3 class="filters-title">
+            Filtry zaawansowane
+          </h3>
+        </div>
+
+        <div class="filters-grid">
+          <!-- Wyszukiwanie tekstowe -->
+          <div class="filter-field">
+            <label for="searchFilter" class="filter-label">
+              Wyszukaj w nazwie lub źródle
+            </label>
+            <div class="search-input-wrapper">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <input 
+                id="searchFilter"
+                type="text"
+                class="filter-input filter-input--search"
+                placeholder="Wpisz nazwę projektu lub źródło..."
+                [value]="searchTerm()"
+                (input)="onSearchChange($any($event.target).value)">
+              @if (searchTerm()) {
+                <button 
+                  class="clear-input-btn"
+                  (click)="searchTerm.set(''); applyFilters()"
+                  title="Wyczyść">
+                  ✕
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Filtr Tenant -->
+          <div class="filter-field">
+            <label for="tenantFilter" class="filter-label">
+              Zespół projektowy
+            </label>
+            <select 
+              id="tenantFilter"
+              class="filter-select"
+              [value]="selectedTenantId() || ''"
+              (change)="onTenantFilterChange($any($event.target).value)"
+              [disabled]="isLoadingTenants()">
+              <option value="">Wszystkie zespoły</option>
+              @if (isLoadingTenants()) {
+                <option disabled>Ładowanie zespołów...</option>
+              } @else {
+                @for (tenant of tenants(); track tenant.id) {
+                  <option [value]="tenant.id">
+                    {{ tenant.name }} ({{ tenant.memberCount }} {{ tenant.memberCount === 1 ? 'członek' : 'członków' }})
+                  </option>
+                }
+              }
+            </select>
+          </div>
+
+          <!-- Filtr Status (przygotowany na przyszłość) -->
+          <div class="filter-field">
+            <label for="statusFilter" class="filter-label">
+              Status projektu
+            </label>
+            <select 
+              id="statusFilter"
+              class="filter-select"
+              [value]="selectedStatus() || ''"
+              (change)="onStatusChange($any($event.target).value)">
+              <option value="">Wszystkie statusy</option>
+              <option value="Draft">Szkic</option>
+              <option value="InProgress">W trakcie</option>
+              <option value="Completed">Ukończony</option>
+            </select>
+          </div>
+
+          <!-- Filtr Data utworzenia OD -->
+          <div class="filter-field">
+            <label for="dateFromFilter" class="filter-label">
+              Data utworzenia od
+            </label>
+            <input 
+              id="dateFromFilter"
+              type="date"
+              class="filter-input"
+              [value]="dateFrom() || ''"
+              (change)="onDateFromChange($any($event.target).value)">
+          </div>
+
+          <!-- Filtr Data utworzenia DO -->
+          <div class="filter-field">
+            <label for="dateToFilter" class="filter-label">
+              Data utworzenia do
+            </label>
+            <input 
+              id="dateToFilter"
+              type="date"
+              class="filter-input"
+              [value]="dateTo() || ''"
+              (change)="onDateToChange($any($event.target).value)">
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          @if (hasActiveFilters()) {
+            <app-button
+              [variant]="'secondary'"
+              [style]="'text'"
+              (clicked)="clearAllFilters()">
+              Wyczyść wszystkie
+            </app-button>
+          }
+          <app-button
+            [variant]="'secondary'"
+            [size]="'small'"
+            (clicked)="toggleAdvancedFilters()">
+            Ukryj filtry
+          </app-button>
+          <app-button
+            [variant]="'primary'"
+            [size]="'small'"
+            (clicked)="applyFilters()">
+            Zastosuj filtry
+          </app-button>
+        </div>
+
+        @if (hasActiveFilters()) {
+          <div class="active-filters-summary">
+            <span class="summary-label">Aktywne filtry:</span>
+            <div class="active-filters-tags">
+              @if (selectedTenantId()) {
+                <span class="filter-tag">
+                  <span class="filter-tag-label">Zespół:</span>
+                  <span class="filter-tag-value">{{ getSelectedTenantName() }}</span>
+                  <button class="filter-tag-remove" (click)="selectedTenantId.set(null); applyFilters()">✕</button>
+                </span>
+              }
+              @if (searchTerm()) {
+                <span class="filter-tag">
+                  <span class="filter-tag-label">Szukaj:</span>
+                  <span class="filter-tag-value">{{ searchTerm() }}</span>
+                  <button class="filter-tag-remove" (click)="searchTerm.set(''); applyFilters()">✕</button>
+                </span>
+              }
+              @if (selectedStatus()) {
+                <span class="filter-tag">
+                  <span class="filter-tag-label">Status:</span>
+                  <span class="filter-tag-value">{{ selectedStatus() }}</span>
+                  <button class="filter-tag-remove" (click)="selectedStatus.set(null); applyFilters()">✕</button>
+                </span>
+              }
+              @if (dateFrom()) {
+                <span class="filter-tag">
+                  <span class="filter-tag-label">Od:</span>
+                  <span class="filter-tag-value">{{ dateFrom() }}</span>
+                  <button class="filter-tag-remove" (click)="dateFrom.set(null); applyFilters()">✕</button>
+                </span>
+              }
+              @if (dateTo()) {
+                <span class="filter-tag">
+                  <span class="filter-tag-label">Do:</span>
+                  <span class="filter-tag-value">{{ dateTo() }}</span>
+                  <button class="filter-tag-remove" (click)="dateTo.set(null); applyFilters()">✕</button>
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!isLoading() && projects().length === 0 && !hasActiveFilters()) {
+      <app-empty-state
+        icon="folder"
+        title="Nie masz jeszcze żadnych projektów"
+        message="Widzisz tu projekty zespołów, do których należysz, oraz własne projekty prywatne. Zacznij od pierwszego pisma."
+        [actionLabel]="'Utwórz pierwszy projekt'"
+        (actionClick)="onCreateProject()"
+      />
+    } @else {
+      <!-- Tabela d2-grid (D2GuiShared): szkielet ładowania, sortowanie, filtry kolumnowe i strony po stronie klienta;
+           filtry zaawansowane powyżej zawężają zbiór po stronie serwera. -->
+      <app-project-list-table
+        [projects]="projects()"
+        [loading]="isLoading()"
+        (projectClick)="onOpenProject($event)"
+      />
+    }
+  </div>
+</app-page-layout>

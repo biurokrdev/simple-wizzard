@@ -1,0 +1,36 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=D2CreatorDb;Username=postgres;Password=CHANGE_ME"
+  },
+  "WorkerCatalog": {
+    "BaseUrl": "",
+    "ApiKey": "",
+    "TimeoutSeconds": 15
+  },
+  "TargetApplication": {
+    "PackageUrl": "",
+    "ApiKey": "",
+    "TimeoutSeconds": 60
+  },
+  "GoogleCloudStorage": {
+    "BucketName": "d2creator-templates",
+    "ApiEndpoint": "http://localhost:4443"
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Information",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.EntityFrameworkCore": "Information"
+      }
+    }
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug",
+      "Microsoft.AspNetCore": "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  }
+}

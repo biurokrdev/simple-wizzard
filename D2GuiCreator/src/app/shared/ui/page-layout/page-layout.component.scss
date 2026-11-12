@@ -1,0 +1,45 @@
+@use 'tokens';
+@use 'mixins';
+
+/* Strona w motywie D2: tytuł i podtytuł na tle strony, treść w białym panelu (rozmiary z --d2-*). */
+.page-layout {
+  padding: 8px 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-layout__header {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.page-layout__title {
+  font-size: var(--d2-title-font-size);
+  font-weight: 700;
+  line-height: 1.2;
+  color: tokens.$color-header;
+  margin: 0 0 8px 0;
+}
+
+.page-layout__subtitle {
+  font-size: var(--d2-subtitle-font-size);
+  color: tokens.$color-text-muted;
+  margin: 0;
+}
+
+.page-layout__actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+
+  > [actions] {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+}
+
+.page-layout__content {
+  @include mixins.panel;
+}

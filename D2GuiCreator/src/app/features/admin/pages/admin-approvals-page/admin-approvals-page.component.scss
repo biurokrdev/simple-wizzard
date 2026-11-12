@@ -1,0 +1,44 @@
+@use 'tokens';
+
+.approvals-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.approvals-summary {
+  font-size: 14px;
+  color: tokens.$color-text-muted;
+}
+
+.link-plain {
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: tokens.$color-text-main;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    color: tokens.$color-primary;
+  }
+}
+
+.d2-row-button--approve {
+  color: var(--d2-color-success);
+  border-color: var(--d2-color-success);
+}
+
+.d2-row-button--reject {
+  color: var(--d2-color-danger);
+  border-color: var(--d2-color-danger);
+}
+
+.decision-summary {
+  margin: 0;
+  font-size: 15px;
+  color: tokens.$color-text-main;
+}

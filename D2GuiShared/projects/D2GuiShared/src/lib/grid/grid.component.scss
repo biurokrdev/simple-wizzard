@@ -1,0 +1,643 @@
+// Wygląd kontrolki opiera się o zmienne CSS - aplikacja może je nadpisać
+// (np. w `:root` albo na konkretnym `<d2-grid>`) bez modyfikacji komponentu.
+// Wartości domyślne odpowiadają projektowi list D2 (pomarańcz + fiolet).
+:host {
+  // Kolory z motywu aplikacji (D2ThemeService / styles/_theme.scss); wartości po przecinku = paleta „orange”.
+  --d2-grid-accent: var(--d2-color-primary, #ff6200); // ikony, podkreślenia, linie tabeli
+  --d2-grid-primary: var(--d2-color-accent, #4b4a9b); // elementy aktywne i akcje wiersza
+  --d2-grid-text: var(--d2-color-heading, #1c1c1c);
+  --d2-grid-muted: var(--d2-color-muted, #6b6b6b);
+  --d2-grid-disabled: #9b9b9b;
+  --d2-grid-border: var(--d2-color-border, #e3e3e3);
+  --d2-grid-border-strong: var(--d2-color-border-strong, #c9c9c9);
+  --d2-grid-input-border: #b7b7b7; // ramki pól filtrów i wyszukiwarki
+  --d2-grid-surface: var(--d2-color-surface, #ffffff);
+  --d2-grid-surface-muted: var(--d2-color-surface-muted, #f5f5f5);
+  --d2-grid-stripe: #f6f6f6;
+  --d2-grid-row-hover: var(--d2-color-primary-light, #fde3cf); // podświetlenie wiersza (hover / zaznaczony / rozwinięty)
+  --d2-grid-skeleton: #e6e6e6;
+  --d2-grid-shadow: 0 1px 3px rgb(28 28 28 / 10%);
+  --d2-grid-shadow-strong: 0 6px 16px rgb(28 28 28 / 16%);
+  --d2-grid-radius: 4px;
+  --d2-grid-font-size: 14px;
+  --d2-grid-cell-padding: 14px 10px; // wysokość wierszy jak na listach D2 (ok. 70 px przy dwóch liniach tekstu)
+
+  display: block;
+  // Kontekst pozycjonowania dla elementów .d2-grid__sr-only (position: absolute) - bez niego
+  // lądowały względem dokumentu i rozciągały <body> poza okno (drugi pasek przewijania).
+  position: relative;
+  color: var(--d2-grid-text);
+  font-size: var(--d2-grid-font-size);
+  background: var(--d2-grid-surface);
+}
+
+// --- Panel filtrów ---------------------------------------------------------
+
+.d2-grid__filters {
+  padding: 12px 0;
+}
+
+.d2-grid__filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.d2-grid__filters-toggle,
+.d2-grid__filters-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.d2-grid__filters-toggle {
+  color: var(--d2-grid-text);
+  background: var(--d2-grid-surface);
+  border: 1px solid var(--d2-grid-border-strong);
+  border-radius: var(--d2-grid-radius);
+  box-shadow: var(--d2-grid-shadow);
+}
+
+.d2-grid__filters-clear {
+  color: var(--d2-grid-primary);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+}
+
+.d2-grid__filters-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.d2-grid__filters-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.d2-grid__filters-label {
+  color: var(--d2-grid-muted);
+}
+
+.d2-grid__filters-select {
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--d2-grid-text);
+  background: var(--d2-grid-surface);
+  border: 1px solid var(--d2-grid-border-strong);
+  border-radius: var(--d2-grid-radius);
+  box-shadow: var(--d2-grid-shadow);
+}
+
+// --- Pasek narzędzi --------------------------------------------------------
+
+.d2-grid__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+// Bez wyszukiwarki i bez akcji aplikacji pasek narzędzi znika w całości.
+.d2-grid__toolbar:not(:has(.d2-grid__search, .d2-grid__projected > *)) {
+  display: none;
+}
+
+// Same akcje (bez wyszukiwarki) - do prawej.
+.d2-grid__toolbar:not(:has(.d2-grid__search)) {
+  justify-content: flex-end;
+}
+
+.d2-grid__search {
+  position: relative;
+  flex: 1 1 260px;
+  max-width: 420px;
+}
+
+.d2-grid__search-input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 36px 8px 12px;
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--d2-grid-input-border);
+  border-radius: var(--d2-grid-radius);
+  background: var(--d2-grid-surface);
+}
+
+// Wspólny wygląd ikon lupy (wyszukiwarka i filtry kolumnowe).
+.d2-grid__search-icon,
+.d2-grid__filter-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--d2-grid-accent);
+  pointer-events: none;
+}
+
+.d2-grid__search-icon {
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+}
+
+// Wspólny sposób podświetlenia pól tekstowych.
+.d2-grid__search-input:focus-visible,
+.d2-grid__filter-input:focus-visible,
+.d2-grid__filters-select:focus-visible {
+  outline: 2px solid var(--d2-grid-primary);
+  outline-offset: 1px;
+}
+
+// Pole zablokowane przez drugi sposób zawężania listy.
+.d2-grid__search-input:disabled,
+.d2-grid__filter-input:disabled {
+  color: var(--d2-grid-disabled);
+  background: var(--d2-grid-surface-muted);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.d2-grid__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.d2-grid__projected {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.d2-grid__projected--hidden {
+  display: none;
+}
+
+// --- Tabela ----------------------------------------------------------------
+
+.d2-grid__scroll {
+  overflow-x: auto;
+}
+
+.d2-grid__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+// Obszar danych jest domknięty cienką pomarańczową linią (jak w projekcie).
+.d2-grid__head,
+.d2-grid__body {
+  border-bottom: 1px solid var(--d2-grid-accent);
+}
+
+// Nagłówki: pogrubione, ciemne, mogą się łamać na dwie linie; ikona sortowania przy prawej krawędzi.
+.d2-grid__head-cell {
+  padding: 8px 10px 4px;
+  color: var(--d2-grid-text);
+  font-weight: 700;
+  text-align: left;
+  vertical-align: bottom;
+  line-height: 1.25;
+}
+
+.d2-grid__sort {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.d2-grid__sort:hover {
+  color: var(--d2-grid-primary);
+}
+
+.d2-grid__sort-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding-bottom: 1px;
+}
+
+.d2-grid__sort-icon svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--d2-grid-text);
+  stroke-width: 1.5;
+}
+
+.d2-grid__sort-icon--asc .d2-grid__sort-up,
+.d2-grid__sort-icon--desc .d2-grid__sort-down {
+  stroke: var(--d2-grid-accent);
+  stroke-width: 2;
+}
+
+.d2-grid__sort-icon--asc .d2-grid__sort-down,
+.d2-grid__sort-icon--desc .d2-grid__sort-up {
+  stroke: var(--d2-grid-border-strong);
+}
+
+// Pola filtrów wypełniają kolumnę niemal po brzegi (wąskie odstępy), ramka jak w polach formularzy D2.
+.d2-grid__filter-cell {
+  padding: 2px 3px 8px;
+  font-weight: 400;
+}
+
+.d2-grid__filter {
+  position: relative;
+  display: block;
+}
+
+.d2-grid__filter-input {
+  width: 100%;
+  min-width: 60px;
+  height: 30px;
+  padding: 4px 28px 4px 8px;
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--d2-grid-input-border);
+  border-radius: var(--d2-grid-radius);
+  background: var(--d2-grid-surface);
+}
+
+.d2-grid__filter-icon {
+  right: 8px;
+  width: 15px;
+  height: 15px;
+  stroke-width: 2.2;
+}
+
+.d2-grid__filter-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--d2-grid-muted);
+  transform: translateY(-50%);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.d2-grid__filter-clear:hover {
+  color: var(--d2-grid-accent);
+}
+
+.d2-grid__row:nth-child(even) {
+  background: var(--d2-grid-stripe);
+}
+
+.d2-grid__row:hover {
+  background: var(--d2-grid-row-hover);
+}
+
+// Rozwinięty wiersz: białe tło i pogrubiony tekst - panel szczegółów pod nim jest jego kontynuacją.
+// (podwójna klasa, żeby wygrać z .d2-grid__row:nth-child(even))
+.d2-grid__row.d2-grid__row--expanded,
+.d2-grid__row.d2-grid__row--expanded:hover {
+  background: var(--d2-grid-surface);
+  font-weight: 700;
+}
+
+// Wiersze bez linii poziomych - rozdziela je naprzemienne tło; kolumny oddziela kropkowana linia.
+.d2-grid__cell {
+  padding: var(--d2-grid-cell-padding);
+  vertical-align: middle;
+}
+
+.d2-grid__row .d2-grid__cell + .d2-grid__cell,
+.d2-grid__skeleton-row .d2-grid__cell + .d2-grid__cell {
+  border-left: 1px dotted var(--d2-grid-border-strong);
+}
+
+.d2-grid__cell--center {
+  text-align: center;
+}
+
+.d2-grid__cell--right {
+  text-align: right;
+}
+
+.d2-grid__message {
+  padding: 32px 8px;
+  color: var(--d2-grid-muted);
+  text-align: center;
+}
+
+// --- Zaznaczanie wierszy ---------------------------------------------------
+
+.d2-grid__select-cell {
+  width: 34px;
+  text-align: center;
+}
+
+.d2-grid__checkbox {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--d2-grid-accent);
+  cursor: pointer;
+}
+
+.d2-grid__row--selected {
+  background: var(--d2-grid-row-hover);
+}
+
+.d2-grid__row--clickable {
+  cursor: pointer;
+}
+
+.d2-grid__selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+  border-top: 1px solid var(--d2-grid-border);
+}
+
+.d2-grid__selection-count {
+  font-weight: 600;
+}
+
+// --- Szczegóły wiersza (kolumny schowane przy wąskim ekranie) ---------------
+
+.d2-grid__expander-cell {
+  width: 40px;
+  text-align: center;
+}
+
+// Szewron SVG; po otwarciu obrócony. Przycisk ma własny obszar kliknięcia 28x28 px.
+.d2-grid__expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--d2-grid-text);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.d2-grid__expander svg {
+  width: 16px;
+  height: 16px;
+}
+
+.d2-grid__expander:hover {
+  background: var(--d2-grid-surface-muted);
+}
+
+.d2-grid__expander--open {
+  transform: rotate(180deg);
+}
+
+// Panel szczegółów: biały, oddzielony od kolejnego wiersza cieniem (jak w projekcie list D2).
+.d2-grid__detail {
+  position: relative;
+  padding: 18px 10px 22px;
+  font-weight: 400;
+  background: var(--d2-grid-surface);
+  border-top: 1px solid var(--d2-grid-border);
+  box-shadow: 0 7px 7px -5px rgb(28 28 28 / 22%);
+}
+
+.d2-grid__detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.d2-grid__detail-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.d2-grid__detail-item dt {
+  color: var(--d2-grid-text);
+  font-weight: 700;
+  text-align: right;
+}
+
+.d2-grid__detail-item dd {
+  margin: 0;
+}
+
+// Własny szablon szczegółów (d2GridDetail) - pod listą schowanych kolumn.
+.d2-grid__detail-list + .d2-grid__detail-custom {
+  margin-top: 16px;
+}
+
+// --- Szkielet ładowania ----------------------------------------------------
+
+// Na czas ładowania każdy element grida (wyszukiwarka, filtry, nagłówki,
+// komórki, stopka) ma swój odpowiednik w postaci prostokąta.
+.d2-grid__skeleton {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--d2-grid-skeleton);
+  animation: d2-grid-pulse 1.4s ease-in-out infinite;
+}
+
+.d2-grid__skeleton--search {
+  width: 100%;
+  height: 36px;
+  border-radius: var(--d2-grid-radius);
+}
+
+.d2-grid__skeleton--action {
+  width: 110px;
+  height: 14px;
+}
+
+.d2-grid__skeleton--button {
+  width: 120px;
+  height: 32px;
+  border-radius: var(--d2-grid-radius);
+}
+
+.d2-grid__skeleton--field {
+  height: 36px;
+  border-radius: var(--d2-grid-radius);
+}
+
+.d2-grid__skeleton--checkbox {
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+.d2-grid__skeleton--header {
+  width: 70%;
+  height: 10px;
+}
+
+.d2-grid__skeleton--filter {
+  height: 24px;
+  border-radius: 2px;
+}
+
+.d2-grid__skeleton--page-size {
+  width: 130px;
+  height: 28px;
+  border-radius: var(--d2-grid-radius);
+}
+
+.d2-grid__skeleton--pagination {
+  width: 260px;
+  height: 26px;
+  border-radius: 13px;
+}
+
+// Nieparzyste wiersze są nieco jaśniejsze - szkielet "oddycha" jak lista.
+.d2-grid__skeleton-row:nth-child(odd) .d2-grid__skeleton {
+  opacity: 0.65;
+}
+
+@keyframes d2-grid-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .d2-grid__skeleton {
+    animation: none;
+  }
+}
+
+// --- Stopka ----------------------------------------------------------------
+
+.d2-grid__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+.d2-grid__page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--d2-grid-muted);
+}
+
+.d2-grid__page-size-select {
+  padding: 6px 8px;
+  font: inherit;
+  color: var(--d2-grid-text);
+  border: 1px solid var(--d2-grid-border-strong);
+  border-radius: var(--d2-grid-radius);
+  background: var(--d2-grid-surface);
+  box-shadow: var(--d2-grid-shadow);
+}
+
+.d2-grid__pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.d2-grid__summary {
+  color: var(--d2-grid-muted);
+}
+
+.d2-grid__pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.d2-grid__page-button {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--d2-grid-text);
+  background: var(--d2-grid-surface);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.d2-grid__page-button:hover:not(:disabled) {
+  border-color: var(--d2-grid-primary);
+}
+
+.d2-grid__page-button--active {
+  color: #ffffff;
+  background: var(--d2-grid-primary);
+  border-color: var(--d2-grid-primary);
+  box-shadow: var(--d2-grid-shadow);
+}
+
+.d2-grid__page-button--arrow {
+  color: var(--d2-grid-muted);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.d2-grid__page-button:disabled {
+  color: var(--d2-grid-border-strong);
+  cursor: default;
+}
+
+.d2-grid__page-ellipsis {
+  padding: 0 2px;
+  color: var(--d2-grid-muted);
+}
+
+// --- Dostępność ------------------------------------------------------------
+
+// Treść czytana przez czytniki ekranu, niewidoczna wizualnie.
+.d2-grid__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

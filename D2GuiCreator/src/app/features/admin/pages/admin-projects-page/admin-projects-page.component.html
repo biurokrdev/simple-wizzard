@@ -1,0 +1,60 @@
+<app-page-layout
+  title="Projekty pism"
+  subtitle="Wszystkie projekty utworzone w Kreatorze, niezależnie od zespołu. Kolumna „Tenant” pokazuje zespół właściciela projektu.">
+
+  <div actions class="admin-projects-actions">
+    <span class="admin-projects-summary">Projektów: <strong>{{ rows().length }}</strong> · zespołów: <strong>{{ tenantCount() }}</strong></span>
+  </div>
+
+  <div content>
+    @if (error()) {
+      <p class="admin-message admin-message--error">{{ error() }}</p>
+    }
+
+    <d2-grid
+      [columns]="columns"
+      [rows]="rows()"
+      [trackBy]="trackRow"
+      [loading]="isLoading()"
+      [pageSize]="25"
+      [rowClickable]="true"
+      [initialSort]="{ key: 'createdAt', direction: 'desc' }"
+      caption="Wszystkie projekty pism"
+      emptyMessage="Brak projektów"
+      (rowClick)="open($event)">
+
+      <ng-template d2GridCell="tenantName" let-row>
+        @if (row.tenantId) {
+          <span class="d2-type-badge">{{ row.tenantName }}</span>
+        } @else {
+          <span class="admin-muted">prywatny</span>
+        }
+      </ng-template>
+
+      <ng-template d2GridCell="templateName" let-row>
+        @if (row.templateName) {
+          <span class="template-cell">
+            <span class="template-cell__name" [title]="row.templateName">{{ row.templateName }}</span>
+            @if (row.templateVersionTag) {
+              <span class="template-cell__version" [class.template-cell__version--active]="row.templateVersionIsActive">
+                {{ row.templateVersionIsActive ? 'aktywna' : 'robocza' }} {{ row.templateVersionTag }}
+              </span>
+            }
+          </span>
+        } @else {
+          <span class="admin-muted">brak szablonu</span>
+        }
+      </ng-template>
+
+      <ng-template d2GridCell="hasActiveVersion" let-row>
+        <span class="status-pill" [class.status-pill--active]="row.hasActiveVersion">{{ row.hasActiveVersion ? 'aktywny' : 'roboczy' }}</span>
+      </ng-template>
+
+      <ng-template d2GridCell="actions" let-row>
+        <div class="d2-row-actions">
+          <button type="button" class="d2-row-button" (click)="open(row)">Wyświetl</button>
+        </div>
+      </ng-template>
+    </d2-grid>
+  </div>
+</app-page-layout>

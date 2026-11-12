@@ -1,0 +1,16 @@
+<div class="d2-app-shell">
+  <div class="d2-app-shell__top">
+    <d2-global-banners />
+    <d2-header>
+      @if (showThemeSwitcher) {
+        <d2-theme-switcher />
+      }
+    </d2-header>
+  </div>
+
+  <main class="d2-app-shell__content">
+    <router-outlet />
+  </main>
+
+  <d2-footer />
+</div>

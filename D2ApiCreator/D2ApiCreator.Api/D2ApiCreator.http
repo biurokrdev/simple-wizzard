@@ -1,0 +1,27 @@
+@D2ApiCreator_HostAddress = http://localhost:5059
+
+GET {{D2ApiCreator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+# Health Check
+GET {{D2ApiCreator_HostAddress}}/api/health
+Accept: application/json
+
+###
+
+# Extract Placeholders from DOCX
+# Note: You need to replace the file path with your actual DOCX file
+POST {{D2ApiCreator_HostAddress}}/api/documents/extract-placeholders
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="example.docx"
+Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+< ./path/to/your/document.docx
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+

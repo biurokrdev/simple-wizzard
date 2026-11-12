@@ -1,0 +1,35 @@
+@use 'tokens';
+
+.admin-projects-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.admin-projects-summary {
+  font-size: 14px;
+  color: tokens.$color-text-muted;
+}
+
+.template-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__version {
+    font-size: 12px;
+    color: tokens.$color-text-muted;
+
+    &--active {
+      color: var(--d2-color-success);
+      font-weight: 600;
+    }
+  }
+}

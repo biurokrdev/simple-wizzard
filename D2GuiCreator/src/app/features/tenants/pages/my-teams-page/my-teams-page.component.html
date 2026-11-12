@@ -1,0 +1,133 @@
+<app-page-layout title="Moje zespoły projektowe">
+  <div actions class="page-actions">
+    <app-button
+      [variant]="'primary'"
+      (clicked)="onCreateTenant()">
+      + Dodaj zespół
+    </app-button>
+  </div>
+
+  <div content>
+    @if (isLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Ładowanie zespołów...</p>
+      </div>
+    } @else if (tenants().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">👥</div>
+        <h3 class="empty-state__title">Brak zespołów</h3>
+        <p class="empty-state__message">
+          Nie należysz jeszcze do żadnego zespołu projektowego.<br>
+          Utwórz nowy zespół lub poczekaj aż ktoś doda Cię do istniejącego.
+        </p>
+        <app-button
+          [variant]="'primary'"
+          (clicked)="onCreateTenant()">
+          Utwórz pierwszy zespół
+        </app-button>
+      </div>
+    } @else {
+      <div class="teams-list">
+        @for (tenant of tenants(); track tenant.id) {
+          <div class="team-card" [class.team-card--expanded]="selectedTenant()?.id === tenant.id">
+            <!-- Team Header -->
+            <div class="team-card__header" (click)="selectTenant(tenant)">
+              <div class="team-card__info">
+                <h3 class="team-card__name">{{ tenant.name }}</h3>
+                @if (tenant.description) {
+                  <p class="team-card__description">{{ tenant.description }}</p>
+                }
+                <div class="team-card__meta">
+                  <span class="team-card__count">{{ tenant.memberCount }} członków</span>
+                  @if (isCreator(tenant)) {
+                    <span class="team-card__badge">Właściciel</span>
+                  }
+                </div>
+              </div>
+              <div class="team-card__actions">
+                @if (isCreator(tenant)) {
+                  <button
+                    type="button"
+                    class="btn-icon btn-icon--danger"
+                    (click)="deleteTenant(tenant); $event.stopPropagation()"
+                    title="Usuń zespół">
+                    🗑️
+                  </button>
+                }
+                <svg 
+                  class="team-card__icon" 
+                  [class.team-card__icon--rotated]="selectedTenant()?.id === tenant.id"
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 20 20" 
+                  fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Team Members (Expanded) -->
+            @if (selectedTenant()?.id === tenant.id) {
+              <div class="team-card__content">
+                <div class="members-section">
+                  <h4 class="members-section__title">Członkowie zespołu</h4>
+                  
+                  <div class="members-list">
+                    @for (member of tenant.members; track member.id) {
+                      <div class="member-item">
+                        <div class="member-item__info">
+                          <span class="member-item__key">{{ member.corporateKey }}</span>
+                          <span class="member-item__date">
+                            Dodano: {{ member.addedAt | date:'dd.MM.yyyy HH:mm' }}
+                          </span>
+                        </div>
+                        @if (canRemoveMember(tenant, member.corporateKey)) {
+                          <button
+                            type="button"
+                            class="member-item__remove"
+                            (click)="removeMember(tenant, member.id)"
+                            title="Usuń członka">
+                            ✕
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Add Member (only creator) -->
+                  @if (isCreator(tenant)) {
+                    <div class="add-member-form">
+                      <input
+                        type="text"
+                        class="add-member-form__input"
+                        placeholder="Wpisz Corporate Key nowego członka..."
+                        [value]="newMemberKey()"
+                        (input)="newMemberKey.set($any($event.target).value)"
+                        (keyup.enter)="addMember(tenant)">
+                      <app-button
+                        [variant]="'secondary'"
+                        [size]="'small'"
+                        [disabled]="!newMemberKey().trim()"
+                        (clicked)="addMember(tenant)">
+                        + Dodaj członka
+                      </app-button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-page-layout>
+
+<!-- Create Tenant Modal -->
+@if (showCreateModal()) {
+  <app-create-tenant-modal
+    (close)="onCloseModal()"
+    (created)="onTenantCreated($event)">
+  </app-create-tenant-modal>
+}

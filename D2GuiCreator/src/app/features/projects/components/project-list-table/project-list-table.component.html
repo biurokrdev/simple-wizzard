@@ -1,0 +1,40 @@
+<d2-grid
+  [columns]="columns"
+  [rows]="projects()"
+  [trackBy]="trackProject"
+  [loading]="loading()"
+  [pageSize]="10"
+  [initialSort]="{ key: 'createdAt', direction: 'desc' }"
+  [rowClickable]="true"
+  caption="Lista projektów dokumentów"
+  emptyMessage="Brak projektów spełniających kryteria"
+  (rowClick)="projectClick.emit($event)">
+
+  <ng-template d2GridCell="templateName" let-project>
+    @if (project.templateName) {
+      <span class="template-cell">
+        <span class="template-cell__name" [title]="project.templateName">{{ project.templateName }}</span>
+        @if (project.templateVersionTag) {
+          <span
+            class="template-cell__version"
+            [class.template-cell__version--active]="project.templateVersionIsActive"
+            [title]="project.templateVersionIsActive ? 'Szablon z aktywnej wersji' : 'Szablon z ostatniej wersji roboczej — projekt nie ma jeszcze aktywnej wersji'">
+            {{ project.templateVersionIsActive ? 'aktywna' : 'robocza' }} {{ project.templateVersionTag }}
+          </span>
+        }
+      </span>
+    } @else {
+      <span class="template-cell__empty">brak szablonu</span>
+    }
+  </ng-template>
+
+  <ng-template d2GridCell="id" let-project>
+    <span class="d2-mono project-id" [title]="project.id">{{ project.id }}</span>
+  </ng-template>
+
+  <ng-template d2GridCell="actions" let-project>
+    <div class="d2-row-actions">
+      <button type="button" class="d2-row-button" (click)="projectClick.emit(project)">Wyświetl</button>
+    </div>
+  </ng-template>
+</d2-grid>

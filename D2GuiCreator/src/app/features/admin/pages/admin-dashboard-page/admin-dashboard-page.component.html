@@ -1,0 +1,81 @@
+<app-page-layout
+  title="Przegląd"
+  subtitle="Stan Kreatora w skrócie: projekty pism, zgłoszenia czekające na decyzję, zespoły i profile workerów.">
+
+  <div actions class="dashboard-actions">
+    <button type="button" class="d2-link-action d2-link-action--small" (click)="load()" [disabled]="isLoading()">
+      <span class="d2-link-action__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </span>
+      Odśwież
+    </button>
+  </div>
+
+  <div content>
+    @if (error()) {
+      <p class="admin-message admin-message--error">{{ error() }}</p>
+    }
+
+    <div class="kpi-grid" [class.kpi-grid--loading]="isLoading()">
+      <a class="kpi" routerLink="/admin/projects">
+        <span class="kpi__label">Projekty pism</span>
+        <span class="kpi__value">{{ projectCount() }}</span>
+        <span class="kpi__hint">z aktywną wersją: {{ activeProjectCount() }}</span>
+      </a>
+      <a class="kpi" [class.kpi--attention]="pending().length > 0" routerLink="/admin/approvals">
+        <span class="kpi__label">Zgłoszenia do publikacji</span>
+        <span class="kpi__value">{{ pending().length }}</span>
+        <span class="kpi__hint">{{ pending().length > 0 ? 'czekają na decyzję' : 'nic nie czeka' }}</span>
+      </a>
+      <a class="kpi" routerLink="/admin/tenants">
+        <span class="kpi__label">Zespoły (tenanci)</span>
+        <span class="kpi__value">{{ tenants().length }}</span>
+        <span class="kpi__hint">użytkowników: {{ memberCount() }}@if (blockedTenantCount() > 0) { · zablokowane: {{ blockedTenantCount() }} }</span>
+      </a>
+      <a class="kpi" routerLink="/admin/worker-profiles">
+        <span class="kpi__label">Profile workerów</span>
+        <span class="kpi__value">{{ visibleProfileCount() }}<span class="kpi__of"> / {{ profileCount() }}</span></span>
+        <span class="kpi__hint">widoczne w kreatorze / wszystkie</span>
+      </a>
+    </div>
+
+    <section class="dashboard-section">
+      <header class="dashboard-section__header">
+        <h2 class="dashboard-section__title">Najdłużej czekające zgłoszenia</h2>
+        @if (pending().length > 5) {
+          <a class="dashboard-section__link" routerLink="/admin/approvals">wszystkie ({{ pending().length }})</a>
+        }
+      </header>
+
+      @if (!isLoading() && pending().length === 0) {
+        <app-empty-state
+          icon="check"
+          size="section"
+          title="Brak zgłoszeń do publikacji"
+          message="Żadna wersja pisma nie czeka na decyzję. Nowe zgłoszenia pojawią się tutaj i w „Zgłoszenia do publikacji”." />
+      } @else {
+        <ul class="pending-list">
+          @for (row of oldestPending(); track row.versionId) {
+            <li class="pending-item">
+              <div class="pending-item__main">
+                <span class="pending-item__name">{{ row.projectName }}</span>
+                <span class="status-pill status-pill--pending">{{ row.versionTag }}</span>
+                @if (row.tenantId) {
+                  <span class="d2-type-badge">{{ row.tenantName }}</span>
+                } @else {
+                  <span class="admin-muted">prywatny</span>
+                }
+              </div>
+              <div class="pending-item__meta">
+                <span class="admin-muted">zgłoszono {{ row.submittedAt ? (row.submittedAt | date: 'dd.MM.yyyy HH:mm') : '—' }}</span>
+                <button type="button" class="d2-row-button" (click)="review(row)">Przeglądaj</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+</app-page-layout>

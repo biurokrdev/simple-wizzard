@@ -1,0 +1,69 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* ── Stopka / pasek statusu — jak `editor-footer` w D2 ViewerEditor (document-editor.scss) ── */
+.status-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 16px;
+  box-sizing: border-box;
+  background: #f0f0f0;
+  border-top: 1px solid #d0d0d0;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #666;
+}
+
+.status-left,
+.status-center,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Lewa i prawa kolumna dzielą wolne miejsce po równo, więc środek jest naprawdę na środku
+   (edytor używa `position: absolute; left: 50%` — tu flex, żeby nic nie nachodziło na wąskim ekranie). */
+.status-left,
+.status-right {
+  flex: 1 1 0;
+}
+
+.status-right {
+  justify-content: flex-end;
+}
+
+.status-center {
+  flex: 0 0 auto;
+}
+
+.status-item {
+  white-space: nowrap;
+}
+
+.status-tagline {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-env {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-separator {
+  color: #ccc;
+}
+
+@media print {
+  .status-footer {
+    display: none !important;
+  }
+}
