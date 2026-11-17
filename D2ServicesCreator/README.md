@@ -18,7 +18,7 @@ wystawia wyłącznie trzy operacje i wymaga klucza `X-Api-Key`.
 | POST | `/Projects/{projectId}/versions/{versionId}/deactivate` | Wyłącza wersję; projekt zostaje **bez** aktywnej wersji (brak domyślnego fallbacku). Idempotentne | 200, 400, 401, 404 |
 | GET | `/health` | Health check (bez klucza) | 200 |
 
-Błędy są zwracane jako RFC 7807 `application/problem+json` (bez stack trace, z `traceId`).
+Błędy są zwracane jako RFC 7807 `application/problem+json` (bez stack trace, z `correlationId` = nagłówek `X-Correlation-ID` odpowiedzi oraz `traceId`). Logi: Microsoft.Extensions.Logging, JSON na stdout poza Development (`GcpJsonConsoleFormatter`, przełącznik `Logging:UseGcpFormat`), access log z `correlationId` — standard D2 ViewerEditor.
 Enumy (`status`) serializowane jako nazwy: `Draft`, `Active`, `Inactive`, …
 
 ## Uwierzytelnianie

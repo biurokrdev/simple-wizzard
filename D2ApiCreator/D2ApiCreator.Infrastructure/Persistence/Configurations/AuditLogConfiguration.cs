@@ -11,9 +11,9 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 {
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
-        builder.ToTable("audit_log");
+        builder.ToTable("audit_log", ApplicationDbContext.Schema);
         builder.HasKey(a => a.Id);
-        builder.Property(a => a.Id).HasColumnName("id");
+        builder.Property(a => a.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(a => a.Entity).HasColumnName("entity");
         builder.Property(a => a.EntityId).HasColumnName("entity_id");
         builder.Property(a => a.Action).HasColumnName("action");

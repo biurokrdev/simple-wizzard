@@ -9,9 +9,9 @@ public class FileEntityConfiguration : IEntityTypeConfiguration<FileEntity>
 {
     public void Configure(EntityTypeBuilder<FileEntity> builder)
     {
-        builder.ToTable("files");
+        builder.ToTable("files", ApplicationDbContext.Schema);
         builder.HasKey(f => f.Id);
-        builder.Property(f => f.Id).HasColumnName("id");
+        builder.Property(f => f.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(f => f.ProjectVersionId).HasColumnName("project_version_id");
         builder.Property(f => f.Filename).HasColumnName("filename").IsRequired();
         builder.Property(f => f.Content).HasColumnName("content"); // bytea

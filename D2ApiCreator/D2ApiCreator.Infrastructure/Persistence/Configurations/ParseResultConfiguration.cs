@@ -11,9 +11,9 @@ public class ParseResultConfiguration : IEntityTypeConfiguration<ParseResult>
 {
     public void Configure(EntityTypeBuilder<ParseResult> builder)
     {
-        builder.ToTable("parse_results");
+        builder.ToTable("parse_results", ApplicationDbContext.Schema);
         builder.HasKey(pr => pr.Id);
-        builder.Property(pr => pr.Id).HasColumnName("id");
+        builder.Property(pr => pr.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(pr => pr.FileId).HasColumnName("file_id");
         builder.Property(pr => pr.ParsedAt).HasColumnName("parsed_at");
 

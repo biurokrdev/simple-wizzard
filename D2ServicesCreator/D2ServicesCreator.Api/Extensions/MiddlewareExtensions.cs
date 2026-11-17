@@ -7,6 +7,9 @@ public static class MiddlewareExtensions
     public static IApplicationBuilder UseExceptionHandlingMiddleware(this IApplicationBuilder app) =>
         app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+    public static IApplicationBuilder UseRequestObservability(this IApplicationBuilder app) =>
+        app.UseMiddleware<RequestObservabilityMiddleware>();
+
     public static IApplicationBuilder UseApiKeyAuthentication(this IApplicationBuilder app) =>
         app.UseMiddleware<ApiKeyAuthenticationMiddleware>();
 }

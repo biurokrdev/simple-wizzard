@@ -16,16 +16,6 @@
     "BucketName": "d2creator-templates",
     "ApiEndpoint": "http://localhost:4443"
   },
-  "Serilog": {
-    "MinimumLevel": {
-      "Default": "Debug",
-      "Override": {
-        "Microsoft": "Information",
-        "Microsoft.Hosting.Lifetime": "Information",
-        "Microsoft.EntityFrameworkCore": "Information"
-      }
-    }
-  },
   "Logging": {
     "LogLevel": {
       "Default": "Debug",

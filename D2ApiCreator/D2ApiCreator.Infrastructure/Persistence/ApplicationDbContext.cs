@@ -30,8 +30,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext, IUnitOfWor
     public DbSet<Worker> Workers => Set<Worker>();
     public DbSet<WorkerProfile> WorkerProfiles => Set<WorkerProfile>();
 
+    /// <summary>Schemat bazy, w którym żyją wszystkie tabele aplikacji (tworzony przez infra/sql/000_create_schema.sql).</summary>
+    public const string Schema = "cr";
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(Schema);
+
         // Apply all configurations from the assembly
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 

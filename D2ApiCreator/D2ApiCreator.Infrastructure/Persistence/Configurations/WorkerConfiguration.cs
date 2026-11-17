@@ -11,10 +11,10 @@ public class WorkerConfiguration : IEntityTypeConfiguration<Worker>
 {
     public void Configure(EntityTypeBuilder<Worker> builder)
     {
-        builder.ToTable("workers");
+        builder.ToTable("workers", ApplicationDbContext.Schema);
         
         builder.HasKey(w => w.Id);
-        builder.Property(w => w.Id).HasColumnName("id");
+        builder.Property(w => w.Id).HasColumnName("id").ValueGeneratedNever();
         
         builder.Property(w => w.ProjectVersionId)
             .HasColumnName("project_version_id")

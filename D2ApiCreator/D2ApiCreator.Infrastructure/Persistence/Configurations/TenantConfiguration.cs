@@ -11,9 +11,9 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
 {
     public void Configure(EntityTypeBuilder<Tenant> builder)
     {
-        builder.ToTable("tenants");
+        builder.ToTable("tenants", ApplicationDbContext.Schema);
         builder.HasKey(t => t.Id);
-        builder.Property(t => t.Id).HasColumnName("id");
+        builder.Property(t => t.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(t => t.Name).IsRequired().HasColumnName("name");
         builder.Property(t => t.Description).HasColumnName("description");
         builder.Property(t => t.IsActive).HasColumnName("is_active");

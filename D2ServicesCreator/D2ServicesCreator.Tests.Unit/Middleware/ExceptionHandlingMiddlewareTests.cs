@@ -69,10 +69,22 @@ public class ExceptionHandlingMiddlewareTests
         body.RootElement.GetProperty("traceId").GetString().Should().NotBeNullOrWhiteSpace();
     }
 
-    private static async Task<(int StatusCode, string ContentType, JsonDocument Body)> InvokeWith(Exception toThrow)
+    [Fact]
+    public async Task InvokeAsync_WhenCorrelationIdInContext_IncludesItInProblemDetailsExtensions()
+    {
+        var (_, _, body) = await InvokeWith(new ArgumentException("x"), correlationId: "corr-42");
+
+        body.RootElement.GetProperty("correlationId").GetString().Should().Be("corr-42");
+        body.RootElement.GetProperty("traceId").GetString().Should().NotBeNullOrWhiteSpace();
+    }
+
+    private static async Task<(int StatusCode, string ContentType, JsonDocument Body)> InvokeWith(
+        Exception toThrow, string? correlationId = null)
     {
         var context = new DefaultHttpContext();
         context.Response.Body = new MemoryStream();
+        if (correlationId is not null)
+            context.Items[RequestObservabilityMiddleware.CorrelationIdItemKey] = correlationId;
         var middleware = new ExceptionHandlingMiddleware(_ => throw toThrow, NullLogger<ExceptionHandlingMiddleware>.Instance);
 
         await middleware.InvokeAsync(context);

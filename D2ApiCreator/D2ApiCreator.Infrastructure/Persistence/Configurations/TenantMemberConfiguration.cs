@@ -8,13 +8,14 @@ public class TenantMemberConfiguration : IEntityTypeConfiguration<TenantMember>
 {
     public void Configure(EntityTypeBuilder<TenantMember> builder)
     {
-        builder.ToTable("tenant_members");
+        builder.ToTable("tenant_members", ApplicationDbContext.Schema);
 
         builder.HasKey(tm => tm.Id);
 
         builder.Property(tm => tm.Id)
             .HasColumnName("id")
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedNever();
 
         builder.Property(tm => tm.TenantId)
             .HasColumnName("tenant_id")

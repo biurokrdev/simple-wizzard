@@ -11,9 +11,9 @@ public class ProjectVersionConfiguration : IEntityTypeConfiguration<ProjectVersi
 {
     public void Configure(EntityTypeBuilder<ProjectVersion> builder)
     {
-        builder.ToTable("project_versions");
+        builder.ToTable("project_versions", ApplicationDbContext.Schema);
         builder.HasKey(pv => pv.Id);
-        builder.Property(pv => pv.Id).HasColumnName("id");
+        builder.Property(pv => pv.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(pv => pv.ProjectId).HasColumnName("project_id");
         builder.Property(pv => pv.Major).HasColumnName("major");
         builder.Property(pv => pv.Minor).HasColumnName("minor");

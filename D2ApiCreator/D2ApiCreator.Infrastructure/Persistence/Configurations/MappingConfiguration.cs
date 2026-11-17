@@ -12,9 +12,9 @@ public class MappingConfiguration : IEntityTypeConfiguration<Mapping>
 {
     public void Configure(EntityTypeBuilder<Mapping> builder)
     {
-        builder.ToTable("mappings");
+        builder.ToTable("mappings", ApplicationDbContext.Schema);
         builder.HasKey(m => m.Id);
-        builder.Property(m => m.Id).HasColumnName("id");
+        builder.Property(m => m.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(m => m.ProjectVersionId).HasColumnName("project_version_id");
         builder.Property(m => m.TagName).HasColumnName("tag_name");
         builder.Property(m => m.MappingType).HasConversion<string>().HasColumnName("mapping_type");

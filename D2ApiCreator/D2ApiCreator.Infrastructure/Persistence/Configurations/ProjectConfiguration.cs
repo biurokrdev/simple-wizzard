@@ -10,9 +10,9 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 {
     public void Configure(EntityTypeBuilder<Project> builder)
     {
-        builder.ToTable("projects");
+        builder.ToTable("projects", ApplicationDbContext.Schema);
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id).HasColumnName("id");
+        builder.Property(p => p.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(p => p.TenantId).HasColumnName("tenant_id");
         builder.Property(p => p.Source).HasColumnName("source").IsRequired();
         builder.Property(p => p.Name).HasColumnName("name").IsRequired();

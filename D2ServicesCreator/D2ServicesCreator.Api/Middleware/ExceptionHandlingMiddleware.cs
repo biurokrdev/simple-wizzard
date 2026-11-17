@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace D2ServicesCreator.Api.Middleware;
 
 /// <summary>
-/// Global exception handler returning RFC 7807 <see cref="ProblemDetails"/>. Internal messages and
-/// stack traces are never written to the response — external systems get a generic 500 and a
-/// <c>traceId</c> to quote when reporting the problem; details stay in the logs.
+/// Global exception handler returning RFC 7807 <see cref="ProblemDetails"/> — 1:1 z
+/// <c>D2ServicesViewerEditor.Api</c>. Internal messages and stack traces are never written to the response;
+/// external systems get a generic 500 plus <c>correlationId</c> (D2 observability standard, header
+/// <c>X-Correlation-ID</c>) and <c>traceId</c> (kept for the existing integrator contract) to quote when
+/// reporting the problem. Details stay in the logs.
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
@@ -51,10 +53,13 @@ public sealed class ExceptionHandlingMiddleware
             _ => HandleUnexpectedException()
         };
 
-        if (statusCode >= StatusCodes.Status500InternalServerError)
-            _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
-        else
-            _logger.LogWarning(exception, "Request failed with {StatusCode}: {Message}", statusCode, exception.Message);
+        _logger.LogError(exception, "Wystąpił wyjątek: {Message}", exception.Message);
+
+        if (context.Items.TryGetValue(RequestObservabilityMiddleware.CorrelationIdItemKey, out var correlationId)
+            && correlationId is string id)
+        {
+            problemDetails.Extensions["correlationId"] = id;
+        }
 
         problemDetails.Extensions["traceId"] = context.TraceIdentifier;
 
@@ -120,7 +125,7 @@ public sealed class ExceptionHandlingMiddleware
         {
             Title = "Internal Server Error",
             Status = (int)HttpStatusCode.InternalServerError,
-            Detail = "An unexpected error occurred. Quote the traceId when contacting support.",
+            Detail = "An unexpected error occurred. Quote the correlationId when contacting support.",
             Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
         });
 }

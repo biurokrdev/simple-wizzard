@@ -10,9 +10,9 @@ public class WorkerProfileConfiguration : IEntityTypeConfiguration<WorkerProfile
 {
     public void Configure(EntityTypeBuilder<WorkerProfile> builder)
     {
-        builder.ToTable("worker_profiles");
+        builder.ToTable("worker_profiles", ApplicationDbContext.Schema);
         builder.HasKey(p => p.Id);
-        builder.Property(p => p.Id).HasColumnName("id");
+        builder.Property(p => p.Id).HasColumnName("id").ValueGeneratedNever();
         builder.Property(p => p.Key).HasColumnName("key").HasMaxLength(100).IsRequired();
         builder.HasIndex(p => p.Key).IsUnique().HasDatabaseName("uq_worker_profiles_key");
         builder.Property(p => p.DisplayName).HasColumnName("display_name").HasMaxLength(200).IsRequired();
